@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: members_forge_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    # Health check - MySQL সঠিকভাবে ready হলে তবেই অন্য containers start হবে
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - members_forge_net
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: members_forge_pma
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - members_forge_net
+
+  wordpress:
+    image: wordpress:latest
+    container_name: members_forge_wp
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: "define('WP_DEBUG_LOG', true);"
+    volumes:
+      - wp_content:/var/www/html/wp-content
+      - ./:/var/www/html/wp-content/plugins/members-forge
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - members_forge_net
+
+volumes:
+  db_data:
+  wp_content:
+
+# Custom network - সব services একটি isolated network এ থাকবে
+networks:
+  members_forge_net:
+    driver: bridge
