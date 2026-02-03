@@ -6,8 +6,8 @@
   "license": "GPL-2.0-or-later",
   "main": "assets/build/index.js",
   "scripts": {
-    "start": "wp-scripts start --entry-point=assets/src/index.js --output-path=assets/build",
-    "build": "wp-scripts build --entry-point=assets/src/index.js --output-path=assets/build",
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
     "format": "wp-scripts format",
     "packages-update": "wp-scripts packages-update"
   },
