@@ -77,3 +77,130 @@
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
+/* ===== WordPress Admin Overrides ===== */
+/* Reset WP admin styles for our plugin page */
+.wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+}
+
+#wpcontent {
+    padding-left: 0 !important;
+}
+
+#wpbody-content {
+    padding-bottom: 0 !important;
+    overflow-x: hidden !important;
+}
+
+/* ===== MembersForge App Container ===== */
+.mf-app-container {
+    display: flex;
+    height: calc(100vh - 32px);
+    /* Full height minus WP admin bar */
+    width: calc(100% + 0px);
+    /* Extend to cover WP padding */
+    margin-left: 0px;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+span#footer-thankyou {
+    display: none;
+}
+
+/* Sidebar */
+.mf-sidebar {
+    flex-shrink: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Main content area */
+.mf-main-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Main scrollable area */
+.mf-main-content main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ===== Reset WordPress defaults ===== */
+.mf-app-container h1,
+.mf-app-container h2,
+.mf-app-container h3,
+.mf-app-container h4,
+.mf-app-container p {
+    margin: 0;
+    padding: 0;
+}
+
+.mf-app-container button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.mf-app-container button:focus {
+    box-shadow: none;
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+}
+
+/* Snackbar positioning */
+.components-snackbar-list {
+    position: static !important;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+}
+
+/* Loading spinner */
+.mf-app-container .components-spinner {
+    width: 40px;
+    height: 40px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 960px) {
+    .mf-sidebar {
+        width: 64px !important;
+    }
+
+    .mf-sidebar span.ml-3 {
+        display: none;
+    }
+}
+
+@media (max-width: 782px) {
+    .mf-app-container {
+        height: calc(100vh - 46px);
+        /* Mobile admin bar is taller */
+    }
+
+    .mf-sidebar {
+        width: 56px !important;
+    }
+}
+
+/* Hide WP notices */
+.mf-app-container~.notice,
+.wrap>.notice {
+    display: none;
+}
+
+/* WP collapsed/folded menu adjustment */
+.folded .mf-app-container {
+    width: 100%;
+}
