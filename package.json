@@ -1,0 +1,30 @@
+{
+  "name": "members-forge",
+  "version": "1.0.0",
+  "description": "A full-fledged membership plugin for WordPress.",
+  "author": "MembersForge Team",
+  "license": "GPL-2.0-or-later",
+  "main": "assets/build/index.js",
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "format": "wp-scripts format",
+    "packages-update": "wp-scripts packages-update",
+    "test": "wp-scripts test-unit-js"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@wordpress/scripts": "^27.0.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
+  },
+  "dependencies": {
+    "@wordpress/components": "^27.0.0",
+    "@wordpress/element": "^6.0.0",
+    "@wordpress/i18n": "^5.0.0"
+  }
+}

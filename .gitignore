@@ -1,6 +1,7 @@
 # Dependencies
 /vendor
 /node_modules
+npm-debug.log
 
 # Environment Variables
 .env
@@ -13,3 +14,8 @@
 
 # Build Files
 /dist
+
+# WordPress
+/wp-content/uploads
+
+/assets/build/
