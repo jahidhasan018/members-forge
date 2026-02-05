@@ -42,7 +42,15 @@ class AdminMenu implements ModuleInterface{
             true
         );
         
-        // CSS লোড করা (WordPress Components এর স্টাইল পাওয়ার জন্য)
+        // Tailwind CSS লোড করা
+        wp_enqueue_style(
+            'members-forge-styles',
+            plugins_url( 'assets/build/style-index.css', $plugin_root . '/members-forge.php' ),
+            [],
+            $asset_file['version']
+        );
+        
+        // WordPress Components এর স্টাইল পাওয়ার জন্য
         wp_enqueue_style( 'wp-components' );
     }
 
