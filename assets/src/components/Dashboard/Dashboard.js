@@ -15,13 +15,9 @@ const StatCard = ({ label, value, change, changeType = 'positive', prefix = '', 
     return (
         <Card className="relative">
             <div className="flex flex-col">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                <span className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
                     {label}
-                </span>
-                <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-2xl sm:text-3xl font-bold text-slate-900">
-                        {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
-                    </span>
+
                     {change && (
                         <span className={`
                             text-xs font-medium px-2 py-0.5 rounded-full
@@ -33,6 +29,11 @@ const StatCard = ({ label, value, change, changeType = 'positive', prefix = '', 
                             {isPositive ? '+' : ''}{change}
                         </span>
                     )}
+                </span>
+                <div className="gap-2 flex-wrap">
+                    <span className="text-2xl sm:text-3xl font-bold text-slate-900">
+                        {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+                    </span>
                 </div>
             </div>
         </Card>
