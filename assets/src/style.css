@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* Only scan files in assets/src folder for Tailwind classes */
-@source "../../assets/src/**/*.{js,jsx,ts,tsx}";
+/* Scan JS files in this folder and subfolders */
+@source "./**/*.{js,jsx,ts,tsx}";
 
 /* Also include PHP templates if you use Tailwind classes there */
 @source "../../templates/**/*.php";

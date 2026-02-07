@@ -3,7 +3,6 @@ import { Spinner, SnackbarList } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-import MainLayout from '../Layout/MainLayout';
 import Card from '../UI/Card';
 
 /**
@@ -66,49 +65,36 @@ const Dashboard = () => {
     // Loading State
     if (loading) {
         return (
-            <MainLayout
-                title={__('Dashboard', 'members-forge')}
-                subtitle={__('Manage your membership ecosystem', 'members-forge')}
-            >
-                <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl border border-slate-200">
-                    <Spinner />
-                    <p className="mt-4 text-slate-500 text-sm">{__('Loading dashboard...', 'members-forge')}</p>
-                </div>
-            </MainLayout>
+            <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl border border-slate-200">
+                <Spinner />
+                <p className="mt-4 text-slate-500 text-sm">{__('Loading dashboard...', 'members-forge')}</p>
+            </div>
         );
     }
 
     // Error State
     if (error || !stats) {
         return (
-            <MainLayout
-                title={__('Dashboard', 'members-forge')}
-                subtitle={__('Manage your membership ecosystem', 'members-forge')}
-            >
-                <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl border border-slate-200">
-                    <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-4">
-                        <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <p className="text-slate-700 font-medium">{__('Error loading data', 'members-forge')}</p>
-                    <p className="text-slate-500 text-sm mt-1">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-4 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-900 transition-colors"
-                    >
-                        {__('Try Again', 'members-forge')}
-                    </button>
+            <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl border border-slate-200">
+                <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
-            </MainLayout>
+                <p className="text-slate-700 font-medium">{__('Error loading data', 'members-forge')}</p>
+                <p className="text-slate-500 text-sm mt-1">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-900 transition-colors"
+                >
+                    {__('Try Again', 'members-forge')}
+                </button>
+            </div>
         );
     }
 
     return (
-        <MainLayout
-            title={__('Dashboard', 'members-forge')}
-            subtitle={__('Manage your membership ecosystem', 'members-forge')}
-        >
+        <>
             {/* Stats Grid - Responsive: 1 col mobile, 2 col tablet, 4 col desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-8">
                 <StatCard
@@ -210,7 +196,7 @@ const Dashboard = () => {
                     onRemove={removeNotice}
                 />
             </div>
-        </MainLayout>
+        </>
     );
 };
 
