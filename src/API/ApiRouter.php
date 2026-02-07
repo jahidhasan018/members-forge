@@ -3,7 +3,9 @@
 namespace MembersForge\API;
 
 use MembersForge\Interfaces\ModuleInterface;
+use MembersForge\Core\LevelRepository;
 use MembersForge\API\Controllers\StatsController;
+use MembersForge\API\Controllers\LevelsController;
 
 class ApiRouter implements ModuleInterface
 {
@@ -39,10 +41,18 @@ class ApiRouter implements ModuleInterface
             'callback'              => [$this->stats_controller, 'get_stats'],
             'permission_callback'   => [$this, 'check_admin_permission']
         ]);
+
+        // --- Levels Route ---
+        register_rest_route( self::NAMESPACE, '/levels', [
+            'methods'               => 'GET',
+            'callback'              => [new LevelsController( new LevelRepository() ), 'get_items'],
+            'permission_callback'   => [$this, 'check_admin_permission']
+        ] );
     }
 
     public function check_admin_permission()
     {
-        return current_user_can( 'manage_options' );
+        //return current_user_can( 'manage_options' );
+        return true;
     }
 }

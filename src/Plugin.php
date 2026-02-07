@@ -6,6 +6,7 @@ use MembersForge\API\ApiRouter;
 use MembersForge\Core\ModuleManager;
 use MembersForge\Modules\Admin\AdminMenu;
 use MembersForge\API\Controllers\StatsController;
+use MembersForge\Database\Migrator;
 
 class Plugin
 {
@@ -30,5 +31,12 @@ class Plugin
         $this->module_manager->register(new ApiRouter($stats_controller));
 
         $this->module_manager->boot();
+    }
+
+    // Migrate/Create tables
+    public static function activate(){
+        Migrator::migrate();
+
+        flush_rewrite_rules();
     }
 }

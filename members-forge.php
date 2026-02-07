@@ -18,9 +18,10 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+register_activation_hook( __FILE__, [ \MembersForge\Plugin::class, 'activate' ] );
+
 /**
  * 2. Initialize Plugin
- * (আমরা পরে এখানে মেইন ক্লাস কল করব, এখন জাস্ট স্ট্রাকচার বানালাম)
  */
 function members_forge_init() {
     $plugin = new \MembersForge\Plugin();
