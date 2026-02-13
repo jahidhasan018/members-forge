@@ -3,7 +3,7 @@ namespace MembersForge\Tests\Unit\API;
 
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
-use MembersForge\Core\LevelRepository;
+use MembersForge\Repositories\LevelRepository;
 use MembersForge\API\Controllers\LevelsController;
 use Mockery;
 
@@ -35,11 +35,12 @@ class LevelsControllerTest extends TestCase{
 
         $contorller = new LevelsController($repoMock);
 
-        $request = Mockery::mock('\WP_REST_Request');
+        $request = new \WP_REST_Request();
         $response = $contorller->get_items($request);
 
-        $this->assertIsArray($response);
-        $this->assertCount(2, $response);
-        $this->assertEquals('Silver', $response[0]->name);
+        $this->assertInstanceOf(\WP_REST_Response::class, $response);
+        $this->assertTrue($response->data['success']);
+        $this->assertCount(2, $response->data['data']);
+        $this->assertEquals('Silver', $response->data['data'][0]->name);
     }
 }

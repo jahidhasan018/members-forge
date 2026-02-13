@@ -1,8 +1,9 @@
 <?php
-namespace MembersForge\Tests\Core;
+namespace MembersForge\Tests\Repositories;
 
 use PHPUnit\Framework\TestCase;
-use MembersForge\Core\LevelRepository;
+use MembersForge\Repositories\LevelRepository;
+use MembersForge\Interfaces\LevelRepositoryInterface;
 use Mockery;
 use Brain\Monkey\Functions;
 
@@ -17,6 +18,16 @@ class LevelRepositoryTest extends TestCase{
         \Brain\Monkey\tearDown();
         Mockery::close();
         parent::tearDown();
+    }
+
+    /** @test */
+    public function it_implements_level_repository_interface(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $repository = new LevelRepository();
+        $this->assertInstanceOf( LevelRepositoryInterface::class, $repository );
     }
 
     /** @test */
@@ -51,7 +62,9 @@ class LevelRepositoryTest extends TestCase{
 
     /** @test */
     public function it_can_fetch_all_levels(){
-        global $wpdb;
+        global $wpdb; 
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
 
         $mock_levels = [
             (object) ['id' => 1, 'name' => 'Gold', 'price' => 100],

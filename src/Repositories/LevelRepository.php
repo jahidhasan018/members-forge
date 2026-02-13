@@ -1,7 +1,9 @@
 <?php
-namespace MembersForge\Core;
+namespace MembersForge\Repositories;
 
-class LevelRepository{
+use MembersForge\Interfaces\LevelRepositoryInterface;
+
+class LevelRepository implements LevelRepositoryInterface{
     private $table;
 
     public function __construct() {
@@ -10,12 +12,10 @@ class LevelRepository{
     }
 
     /**
-     * নতুন মেম্বারশিপ লেভেল তৈরি করা
-     *
      * @param array 
      * @return int|false
      */
-    public function create( array $data ){
+    public function create( array $data ): int|false{
         global $wpdb;
 
         $defaults = [
@@ -30,7 +30,7 @@ class LevelRepository{
 
         $result = $wpdb->insert( $this->table, $item, $format );
 
-        // ৫. যদি সফল হয়, নতুন ID ফেরত দাও
+        // Inserted item id
         if ( $result ) {
             return $wpdb->insert_id;
         }
@@ -39,8 +39,8 @@ class LevelRepository{
 
     }
 
-    // Get Levels
-    public function get_levels(){
+    // Return type added to match interface
+    public function get_levels(): array{
         global $wpdb;
 
         $sql = "SELECT * FROM {$this->table} ORDER BY priority DESC, id ASC";

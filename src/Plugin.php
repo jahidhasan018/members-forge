@@ -3,9 +3,11 @@
 namespace MembersForge;
 
 use MembersForge\API\ApiRouter;
+use MembersForge\API\Controllers\LevelsController;
 use MembersForge\Core\ModuleManager;
 use MembersForge\Modules\Admin\AdminMenu;
 use MembersForge\API\Controllers\StatsController;
+use MembersForge\Repositories\LevelRepository;
 use MembersForge\Database\Migrator;
 
 class Plugin
@@ -28,7 +30,10 @@ class Plugin
 
         // Pass Api Router
         $stats_controller = new StatsController();
-        $this->module_manager->register(new ApiRouter($stats_controller));
+
+        $level_repository = new LevelRepository();
+        $levels_controller = new LevelsController($level_repository);
+        $this->module_manager->register(new ApiRouter($stats_controller, $levels_controller));
 
         $this->module_manager->boot();
     }
