@@ -49,6 +49,25 @@ class LevelRepository implements LevelRepositoryInterface{
     }
 
     /**
+     * Update an existing level
+     * 
+     * @param int $id Level ID to update
+     * @param array $data Updated data
+     * @return bool True on success, false on failure
+     */
+    public function update( int $id, array $data ): bool {
+        global $wpdb;
+
+        $format = $this->get_format($data);
+        if( !empty($id) && is_array($format) && !empty($format) ){
+            $result  = $wpdb->update( $this->table, $data, ['id' => $id], $format, ['%d'] );
+            return $result;
+        }
+        
+        return false;
+    }
+
+    /**
      * %s = string, %d = integer, %f = float
      */
     private function get_format( $data ) {

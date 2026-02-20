@@ -7,7 +7,7 @@ use MembersForge\Interfaces\LevelRepositoryInterface;
 use Mockery;
 use Brain\Monkey\Functions;
 
-class LevelRepositoryTest extends TestCase{
+class LevelRepositoryTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
@@ -82,5 +82,49 @@ class LevelRepositoryTest extends TestCase{
         $this->assertIsArray($levels);
         $this->assertCount(2, $levels);
         $this->assertEquals('Gold', $levels[0]->name);
+    }
+
+    /** @test */
+    public function it_can_update_an_existing_level(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $wpdb->shouldReceive('update')
+            ->once()
+            ->with(
+                'wp_members_forge_levels',
+                Mockery::type('array'),
+                Mockery::type('array'),
+                Mockery::type('array'),
+                Mockery::type('array')
+            )->andReturn(1);
+
+        $repo = new LevelRepository();
+
+        $result = $repo->update(1, [
+            'name' => 'Platinum Plan',
+            'price' => 200
+        ]);
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_returns_false_when_update_fails(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $wpdb->shouldReceive('update')
+            ->once()
+            ->andReturn(false);
+        
+        $repo = new LevelRepository();
+        $result = $repo->update(999, [
+            'name' => 'Invalid Plan'
+        ]);
+
+        $this->assertFalse($result);
     }
 }
