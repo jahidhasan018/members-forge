@@ -1,12 +1,13 @@
 <?php
-namespace MembersForge\Tests\Core;
+namespace MembersForge\Tests\Repositories;
 
 use PHPUnit\Framework\TestCase;
-use MembersForge\Core\LevelRepository;
+use MembersForge\Repositories\LevelRepository;
+use MembersForge\Interfaces\LevelRepositoryInterface;
 use Mockery;
 use Brain\Monkey\Functions;
 
-class LevelRepositoryTest extends TestCase{
+class LevelRepositoryTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
@@ -17,6 +18,16 @@ class LevelRepositoryTest extends TestCase{
         \Brain\Monkey\tearDown();
         Mockery::close();
         parent::tearDown();
+    }
+
+    /** @test */
+    public function it_implements_level_repository_interface(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $repository = new LevelRepository();
+        $this->assertInstanceOf( LevelRepositoryInterface::class, $repository );
     }
 
     /** @test */
@@ -51,7 +62,9 @@ class LevelRepositoryTest extends TestCase{
 
     /** @test */
     public function it_can_fetch_all_levels(){
-        global $wpdb;
+        global $wpdb; 
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
 
         $mock_levels = [
             (object) ['id' => 1, 'name' => 'Gold', 'price' => 100],
@@ -69,5 +82,49 @@ class LevelRepositoryTest extends TestCase{
         $this->assertIsArray($levels);
         $this->assertCount(2, $levels);
         $this->assertEquals('Gold', $levels[0]->name);
+    }
+
+    /** @test */
+    public function it_can_update_an_existing_level(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $wpdb->shouldReceive('update')
+            ->once()
+            ->with(
+                'wp_members_forge_levels',
+                Mockery::type('array'),
+                Mockery::type('array'),
+                Mockery::type('array'),
+                Mockery::type('array')
+            )->andReturn(1);
+
+        $repo = new LevelRepository();
+
+        $result = $repo->update(1, [
+            'name' => 'Platinum Plan',
+            'price' => 200
+        ]);
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_returns_false_when_update_fails(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $wpdb->shouldReceive('update')
+            ->once()
+            ->andReturn(false);
+        
+        $repo = new LevelRepository();
+        $result = $repo->update(999, [
+            'name' => 'Invalid Plan'
+        ]);
+
+        $this->assertFalse($result);
     }
 }

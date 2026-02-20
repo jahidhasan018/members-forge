@@ -1,7 +1,9 @@
 <?php
-namespace MembersForge\Core;
+namespace MembersForge\Repositories;
 
-class LevelRepository{
+use MembersForge\Interfaces\LevelRepositoryInterface;
+
+class LevelRepository implements LevelRepositoryInterface{
     private $table;
 
     public function __construct() {
@@ -10,12 +12,10 @@ class LevelRepository{
     }
 
     /**
-     * নতুন মেম্বারশিপ লেভেল তৈরি করা
-     *
      * @param array 
      * @return int|false
      */
-    public function create( array $data ){
+    public function create( array $data ): int|false{
         global $wpdb;
 
         $defaults = [
@@ -30,7 +30,7 @@ class LevelRepository{
 
         $result = $wpdb->insert( $this->table, $item, $format );
 
-        // ৫. যদি সফল হয়, নতুন ID ফেরত দাও
+        // Inserted item id
         if ( $result ) {
             return $wpdb->insert_id;
         }
@@ -39,13 +39,32 @@ class LevelRepository{
 
     }
 
-    // Get Levels
-    public function get_levels(){
+    // Return type added to match interface
+    public function get_levels(): array{
         global $wpdb;
 
         $sql = "SELECT * FROM {$this->table} ORDER BY priority DESC, id ASC";
 
         return $wpdb->get_results($sql);
+    }
+
+    /**
+     * Update an existing level
+     * 
+     * @param int $id Level ID to update
+     * @param array $data Updated data
+     * @return bool True on success, false on failure
+     */
+    public function update( int $id, array $data ): bool {
+        global $wpdb;
+
+        $format = $this->get_format($data);
+        if( !empty($id) && is_array($format) && !empty($format) ){
+            $result  = $wpdb->update( $this->table, $data, ['id' => $id], $format, ['%d'] );
+            return $result;
+        }
+        
+        return false;
     }
 
     /**

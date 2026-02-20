@@ -3,16 +3,15 @@ import { __ } from "@wordpress/i18n";
 /**
  * Sidebar Component - Custom navigation sidebar
  */
-const Sidebar = () => {
+const Sidebar = ({ activePage, onNavigate }) => {
     const menuItems = [
-        { name: 'Dashboard', icon: 'dashboard', active: true },
-        { name: 'Levels', icon: 'layers', active: false },
-        { name: 'Members', icon: 'users', active: false },
-        { name: 'Modules', icon: 'box', active: false },
-        { name: 'Form Builder', icon: 'form', active: false },
-        { name: 'Forge AI', icon: 'ai', active: false },
-        { name: 'Style Guide', icon: 'style', active: false },
-        { name: 'Settings', icon: 'settings', active: false },
+        { id: 'dashboard', name: 'Dashboard', icon: 'dashboard', active: true },
+        { id: 'levels', name: 'Levels', icon: 'layers', active: false },
+        { id: 'members', name: 'Members', icon: 'users', active: false },
+        { id: 'modules', name: 'Modules', icon: 'box', active: false },
+        { id: 'form-builder', name: 'Form Builder', icon: 'form', active: false },
+        { id: 'forge-ai', name: 'Forge AI', icon: 'ai', active: false },
+        { id: 'settings', name: 'Settings', icon: 'settings', active: false },
     ];
 
     const getIcon = (iconName) => {
@@ -85,10 +84,11 @@ const Sidebar = () => {
                 <div className="space-y-1">
                     {menuItems.map((item, index) => (
                         <button
-                            key={index}
-                            className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 ${item.active
-                                ? 'bg-brand-600 text-white'
-                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            key={item.id}
+                            onClick={() => onNavigate(item.id)}
+                            className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-brand-600 ${activePage === item.id
+                                ? 'bg-brand-600 text-white shadow-lg'
+                                : 'text-slate-400 hover:bg-brand-600 hover:text-white'
                                 }`}
                         >
                             <span className="shrink-0 text-current">

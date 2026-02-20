@@ -2,8 +2,9 @@
 
 namespace MembersForge\API\Controllers;
 
-class StatsController
-{
+use MembersForge\API\AbstractController;
+
+class StatsController extends AbstractController {
 
     const CACHE_KEY = 'members_forge_dashboard_stats';
     
@@ -13,7 +14,7 @@ class StatsController
         $cached_stats = get_transient( self::CACHE_KEY );
 
         if (false !== $cached_stats) {
-            return rest_ensure_response( $cached_stats );
+            return $this->success_response( $cached_stats );
         }
 
         $data = [
@@ -27,6 +28,6 @@ class StatsController
 
         set_transient( self::CACHE_KEY, $data, HOUR_IN_SECONDS );
 
-        return rest_ensure_response( $data );
+        return $this->success_response( $data );
     }
 }

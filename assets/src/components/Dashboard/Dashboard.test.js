@@ -10,21 +10,36 @@ jest.mock('@wordpress/i18n', () => ({
     __: (text) => text,
 }));
 
-// Mock WordPress components
-jest.mock('@wordpress/components', () => {
-    const originalModule = jest.requireActual('@wordpress/components');
-    return {
-        ...originalModule,
-        Spinner: () => <div data-testid="spinner">Loading...</div>,
-        SnackbarList: ({ notices }) => (
-            <div data-testid="snackbar-list">
-                {notices && notices.map((notice) => (
-                    <div key={notice.id}>{notice.content}</div>
+// Mock WordPress components — explicit mocks (faster than requireActual)
+jest.mock('@wordpress/components', () => ({
+    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Button: ({ children, onClick, variant, className }) => (
+        <button onClick={onClick} className={className}>{children}</button>
+    ),
+    SelectControl: ({ label, value, onChange, options, ...props }) => (
+        <label>
+            {label}
+            <select value={value} onChange={(e) => onChange(e.target.value)}>
+                {(options || []).map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
-            </div>
-        )
-    }
-});
+            </select>
+        </label>
+    ),
+    Card: ({ children, className }) => <div className={className}>{children}</div>,
+    CardHeader: ({ children }) => <div>{children}</div>,
+    CardBody: ({ children, className }) => <div className={className}>{children}</div>,
+    __experimentalText: ({ children, className, as: Tag = 'span', ...props }) => (
+        <Tag className={className}>{children}</Tag>
+    ),
+    SnackbarList: ({ notices }) => (
+        <div data-testid="snackbar-list">
+            {notices && notices.map((notice) => (
+                <div key={notice.id}>{notice.content}</div>
+            ))}
+        </div>
+    ),
+}));
 
 // Mock the Layout components
 jest.mock('../Layout/MainLayout', () => {
@@ -78,7 +93,7 @@ describe('MemberForge Dashboard', () => {
             growth_rate: 5,
         };
 
-        apiFetch.mockResolvedValue(mockStats);
+        apiFetch.mockResolvedValue({ success: true, data: mockStats });
 
         render(<Dashboard />);
 
@@ -118,10 +133,12 @@ describe('MemberForge Dashboard', () => {
     // Test that apiFetch is called with correct path
     it('calls apiFetch with correct endpoint', async () => {
         apiFetch.mockResolvedValue({
-            active_members: 100,
-            total_revenue: 5000,
-            churn_rate: 2.0,
-            avg_ltv: 300,
+            success: true, data: {
+                active_members: 100,
+                total_revenue: 5000,
+                churn_rate: 2.0,
+                avg_ltv: 300,
+            }
         });
 
         render(<Dashboard />);
@@ -131,29 +148,34 @@ describe('MemberForge Dashboard', () => {
         });
     });
 
-    // Test dashboard title renders
-    it('renders the dashboard title', async () => {
+    // Test that chart section renders
+    it('renders chart sections', async () => {
         apiFetch.mockResolvedValue({
-            active_members: 100,
-            total_revenue: 5000,
-            churn_rate: 2.0,
-            avg_ltv: 300,
+            success: true, data: {
+                active_members: 100,
+                total_revenue: 5000,
+                churn_rate: 2.0,
+                avg_ltv: 300,
+            }
         });
 
         render(<Dashboard />);
 
         await waitFor(() => {
-            expect(screen.getByText('Dashboard')).toBeInTheDocument();
+            expect(screen.getByText('Revenue Over Time')).toBeInTheDocument();
+            expect(screen.getByText('Member Growth')).toBeInTheDocument();
         });
     });
 
     // Test stat labels are displayed
     it('displays all stat labels', async () => {
         apiFetch.mockResolvedValue({
-            active_members: 1248,
-            total_revenue: 24590,
-            churn_rate: 2.4,
-            avg_ltv: 420,
+            success: true, data: {
+                active_members: 1248,
+                total_revenue: 24590,
+                churn_rate: 2.4,
+                avg_ltv: 420,
+            }
         });
 
         render(<Dashboard />);

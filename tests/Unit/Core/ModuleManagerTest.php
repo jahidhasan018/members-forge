@@ -1,5 +1,5 @@
 <?php
-namespace MembersForge\Tests\Unit;
+namespace MembersForge\Tests\Unit\Core;
 
 use PHPUnit\Framework\TestCase;
 use MembersForge\Core\ModuleManager;

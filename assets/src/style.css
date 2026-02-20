@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* Only scan files in assets/src folder for Tailwind classes */
-@source "../../assets/src/**/*.{js,jsx,ts,tsx}";
+/* Scan JS files in this folder and subfolders */
+@source "./**/*.{js,jsx,ts,tsx}";
 
 /* Also include PHP templates if you use Tailwind classes there */
 @source "../../templates/**/*.php";
@@ -203,4 +203,386 @@ span#footer-thankyou {
 /* WP collapsed/folded menu adjustment */
 .folded .mf-app-container {
     width: 100%;
+}
+
+/* ===================================================================
+   WORDPRESS COMPONENTS - BRAND OVERRIDES
+   Apply MembersForge brand colors to @wordpress/components
+   =================================================================== */
+
+/* ===== BUTTONS ===== */
+/* Primary Button */
+.mf-app-container .components-button.is-primary {
+    background: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+    color: white;
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.2s ease;
+}
+
+.mf-app-container .components-button.is-primary:hover,
+.mf-app-container .components-button.is-primary:focus:not(:disabled) {
+    background: var(--color-brand-900);
+    border-color: var(--color-brand-900);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.mf-app-container .components-button.is-primary:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-brand-600);
+}
+
+/* Secondary Button */
+.mf-app-container .components-button.is-secondary {
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    color: var(--color-slate-900);
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.mf-app-container .components-button.is-secondary:hover {
+    background: var(--color-slate-50);
+    border-color: var(--color-slate-500);
+}
+
+/* Tertiary / Link Button */
+.mf-app-container .components-button.is-tertiary,
+.mf-app-container .components-button.is-link {
+    color: var(--color-brand-600);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-lg);
+}
+
+.mf-app-container .components-button.is-tertiary:hover,
+.mf-app-container .components-button.is-link:hover {
+    color: var(--color-brand-900);
+    background: var(--color-brand-50);
+}
+
+/* Destructive Button */
+.mf-app-container .components-button.is-destructive {
+    background: var(--color-status-rose);
+    border-color: var(--color-status-rose);
+    color: white;
+    border-radius: var(--radius-lg);
+}
+
+.mf-app-container .components-button.is-destructive:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+/* Small Button Variant */
+.mf-app-container .components-button.is-small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+/* ===== CARDS ===== */
+.mf-app-container .components-card {
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.mf-app-container .components-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.mf-app-container .components-card__header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-slate-200);
+    background: var(--color-slate-50);
+}
+
+.mf-app-container .components-card__header .components-text {
+    font-weight: 600;
+    color: var(--color-slate-900);
+    font-size: 0.875rem;
+}
+
+.mf-app-container .components-card__body {
+    padding: 1.25rem;
+}
+
+.mf-app-container .components-card__footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--color-slate-200);
+    background: var(--color-slate-50);
+}
+
+/* ===== FORM CONTROLS ===== */
+/* Text Input */
+.mf-app-container .components-text-control__input,
+.mf-app-container .components-textarea-control__input {
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-slate-900);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mf-app-container .components-text-control__input:focus,
+.mf-app-container .components-textarea-control__input:focus {
+    border-color: var(--color-brand-600);
+    box-shadow: 0 0 0 1px var(--color-brand-600);
+    outline: none;
+}
+
+.mf-app-container .components-text-control__input::placeholder,
+.mf-app-container .components-textarea-control__input::placeholder {
+    color: var(--color-slate-500);
+}
+
+/* Select Control */
+.mf-app-container .components-select-control__input {
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-slate-900);
+    background: white;
+    min-height: 36px;
+}
+
+.mf-app-container .components-select-control__input:focus {
+    border-color: var(--color-brand-600);
+    box-shadow: 0 0 0 1px var(--color-brand-600);
+    outline: none;
+}
+
+/* Base Control Label */
+.mf-app-container .components-base-control__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.mf-app-container .components-base-control__help {
+    font-size: 0.75rem;
+    color: var(--color-slate-500);
+    margin-top: 0.25rem;
+}
+
+/* Toggle Control */
+.mf-app-container .components-form-toggle.is-checked .components-form-toggle__track {
+    background: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+}
+
+/* Checkbox */
+.mf-app-container .components-checkbox-control__input[type="checkbox"]:checked {
+    background: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+}
+
+/* Radio */
+.mf-app-container input[type="radio"]:checked {
+    border-color: var(--color-brand-600);
+}
+
+.mf-app-container input[type="radio"]:checked::before {
+    background: var(--color-brand-600);
+}
+
+/* ===== MODAL ===== */
+.mf-app-container .components-modal__screen-overlay {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.mf-app-container .components-modal__frame {
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl);
+    border: none;
+    max-width: 560px;
+}
+
+.mf-app-container .components-modal__header {
+    border-bottom: 1px solid var(--color-slate-200);
+    padding: 1rem 1.5rem;
+}
+
+.mf-app-container .components-modal__header-heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+}
+
+.mf-app-container .components-modal__content {
+    padding: 1.5rem;
+}
+
+.mf-app-container .components-modal__header .components-button {
+    color: var(--color-slate-500);
+}
+
+.mf-app-container .components-modal__header .components-button:hover {
+    color: var(--color-slate-900);
+}
+
+/* ===== NOTICE / SNACKBAR ===== */
+.mf-app-container .components-notice {
+    border-radius: var(--radius-lg);
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-left-width: 4px;
+}
+
+.mf-app-container .components-notice.is-success {
+    background: #ecfdf5;
+    border-left-color: var(--color-status-emerald);
+}
+
+.mf-app-container .components-notice.is-error {
+    background: #fef2f2;
+    border-left-color: var(--color-status-rose);
+}
+
+.mf-app-container .components-notice.is-warning {
+    background: #fffbeb;
+    border-left-color: var(--color-status-amber);
+}
+
+.mf-app-container .components-notice.is-info {
+    background: #f0f9ff;
+    border-left-color: var(--color-status-sky);
+}
+
+.mf-app-container .components-snackbar {
+    border-radius: var(--radius-lg);
+    background: var(--color-slate-900);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===== DROPDOWN MENU ===== */
+.mf-app-container .components-dropdown-menu__toggle {
+    color: var(--color-slate-500);
+    padding: 0.25rem;
+    border-radius: var(--radius-lg);
+}
+
+.mf-app-container .components-dropdown-menu__toggle:hover {
+    color: var(--color-slate-900);
+    background: var(--color-slate-50);
+}
+
+.components-popover.components-dropdown-menu__popover .components-menu-group {
+    padding: 0.25rem;
+}
+
+.components-popover.components-dropdown-menu__popover .components-menu-item__button {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+}
+
+.components-popover.components-dropdown-menu__popover .components-menu-item__button:hover {
+    background: var(--color-slate-50);
+    color: var(--color-slate-900);
+}
+
+/* ===== TABS ===== */
+.mf-app-container .components-tab-panel__tabs {
+    border-bottom: 1px solid var(--color-slate-200);
+}
+
+.mf-app-container .components-tab-panel__tabs-item {
+    color: var(--color-slate-500);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.mf-app-container .components-tab-panel__tabs-item:hover {
+    color: var(--color-slate-900);
+}
+
+.mf-app-container .components-tab-panel__tabs-item.is-active {
+    color: var(--color-brand-600);
+    border-bottom-color: var(--color-brand-600);
+}
+
+/* ===== SPINNER ===== */
+.mf-app-container .components-spinner {
+    border-color: var(--color-brand-600);
+    border-right-color: transparent;
+}
+
+/* ===== LINE CLAMP UTILITIES ===== */
+@utility line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@utility line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ===== LEVEL FORM MODAL ===== */
+.mf-level-modal .components-modal__frame {
+    max-width: 520px;
+    width: 100%;
+}
+
+.mf-level-form .components-base-control {
+    margin-bottom: 0;
+}
+
+.mf-level-form .components-base-control__field {
+    margin-bottom: 0;
+}
+
+.mf-level-form .mf-toggle-section .components-toggle-control {
+    margin-bottom: 0;
+}
+
+.mf-level-form .mf-toggle-section .components-base-control__help {
+    margin: 0.25rem 0 0 0;
+}
+
+.mf-level-form .mf-status-section button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Grid layout fix for form fields */
+.mf-level-form .grid {
+    display: grid;
+}
+
+/* Space utility */
+.mf-level-form.space-y-5>*+* {
+    margin-top: 1.25rem;
+}
+
+/* Disabled input styling */
+.mf-level-form .components-text-control__input:disabled,
+.mf-level-form .components-select-control__input:disabled {
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-500);
+    cursor: not-allowed;
 }
