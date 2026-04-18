@@ -68,4 +68,19 @@ class ApiRouterTest extends TestCase
         $this->assertFalse($router->check_admin_permission());
     }
 
+    /** @test */
+    public function it_registers_levels_crud_routes() {
+        // Verifay how many args is passed in register_rest_route
+        Functions\expect('register_rest_route')->times(3); // stats + levels collection + levels single item
+
+        $mock_stats_controller = $this->createMock( StatsController::class );
+        $mock_level_controller = $this->createMock( LevelsController::class );
+
+        $router = new ApiRouter( $mock_stats_controller, $mock_level_controller );
+        
+        $router->register_routes();
+
+        $this->assertTrue(true);
+    }
+
 }
