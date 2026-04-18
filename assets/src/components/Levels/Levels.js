@@ -1,7 +1,7 @@
-import { useState, useEffect } from '@wordpress/element';
-import { Spinner, Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Spinner } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import Modal from '../UI/Modal';
 import LevelForm from './LevelForm';
 
@@ -65,23 +65,14 @@ const Levels = ({ onNavigate }) => {
         const apiPath = isUpdating
             ? `/members-forge/v1/levels/${editingLevel.id}`
             : '/members-forge/v1/levels';
+        console.log(apiPath);
 
         const method = isUpdating ? 'PUT' : 'POST';
 
-        apiFetch({
-            path: apiPath,
-            method: method,
-            data: data,
-        })
+        apiFetch({ path: apiPath, method: method, data: data })
             .then((savedLevel) => {
-                if (isUpdating) {
-                    // Update existing level in the list
-                    setLevels(levels.map(l => l.id === savedLevel.id ? savedLevel : l));
-                } else {
-                    // Add new level to the list
-                    setLevels([...levels, savedLevel]);
-                }
                 handleCloseModal();
+                fetchLevels();
             })
             .catch((error) => {
                 console.error(error);
@@ -109,13 +100,33 @@ const Levels = ({ onNavigate }) => {
             data: clonedData,
         })
             .then((newLevel) => {
-                setLevels([...levels, newLevel]);
+                fetchLevels();
             })
             .catch((error) => {
                 console.error(error);
                 alert(__('Error cloning level. Please try again.', 'members-forge'));
             });
     };
+
+    /**
+     * Handle delete level
+     * Ask confirmation and then delete level
+     */
+    const handleDelete = (level) => {
+        if( ! window.confirm(
+            __('Are you sure you want to delete', 'members-forge') + ` "${level.name}"?`
+        )){return;}
+
+        apiFetch({ path: `/members-forge/v1/levels/${level.id}`, method: 'DELETE' })
+            .then(() => {
+                // If delete success remove from the frontend list
+                setLevels((prev) => prev.filter((l) => l.id !== level.id ));
+            })
+            .catch((error) => {
+                console.error(error);
+                alert(__('Error deleting level. Please try again.', 'members-forge'));
+            });
+    }
 
     /**
      * Format billing interval for display
@@ -189,12 +200,15 @@ const Levels = ({ onNavigate }) => {
                         >
                             {/* Header with Status & Menu */}
                             <div className="flex justify-between items-start mb-4">
-                                <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wide rounded-md ${level.status === 'active'
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-slate-100 text-slate-600'
-                                    }`}>
-                                    {level.status}
-                                </span>
+                                <div className="left-col flex gap-2 justify-center items-center">
+                                    <span className="bg-slate-100 text-slate-600 px-2.5 py-1 text-xs font-bold uppercase">ID: {level.id}</span>
+                                    <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wide rounded-md ${level.status === 'active'
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-slate-100 text-slate-600'
+                                        }`}>
+                                        {level.status}
+                                    </span>
+                                </div>
 
                                 {/* Free Badge */}
                                 {(level.is_free || level.price === '0' || level.price === 0) && (
@@ -247,7 +261,7 @@ const Levels = ({ onNavigate }) => {
                             )}
 
                             {/* Action Buttons */}
-                            <div className="grid grid-cols-2 gap-3 mt-auto pt-4 border-t border-slate-100">
+                            <div className="grid grid-cols-3 gap-3 mt-auto pt-4 border-t border-slate-100">
                                 <button
                                     onClick={() => handleEdit(level)}
                                     className="flex justify-center items-center px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
@@ -265,6 +279,15 @@ const Levels = ({ onNavigate }) => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
                                     {__('Clone', 'members-forge')}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(level)}
+                                    className="flex justify-center items-center px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+                                >
+                                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    {__('Delete', 'members-forge')}
                                 </button>
                             </div>
                         </div>
