@@ -3,7 +3,7 @@ namespace MembersForge\Repositories;
 
 use MembersForge\Interfaces\LevelRepositoryInterface;
 
-class LevelRepository implements LevelRepositoryInterface{
+class LevelRepository implements LevelRepositoryInterface {
     private $table;
 
     public function __construct() {
@@ -12,6 +12,7 @@ class LevelRepository implements LevelRepositoryInterface{
     }
 
     /**
+     * Create a level
      * @param array 
      * @return int|false
      */
@@ -25,6 +26,8 @@ class LevelRepository implements LevelRepositoryInterface{
         ];
 
         $item = wp_parse_args( $data, $defaults );
+
+        $item['slug'] = $this->generate_unique_slug( $item['name'] ?? '' );
 
         $format = $this->get_format( $item );
 
@@ -57,14 +60,53 @@ class LevelRepository implements LevelRepositoryInterface{
      */
     public function update( int $id, array $data ): bool {
         global $wpdb;
+        $result = false;
 
         $format = $this->get_format($data);
         if( !empty($id) && is_array($format) && !empty($format) ){
             $result  = $wpdb->update( $this->table, $data, ['id' => $id], $format, ['%d'] );
-            return $result;
+        }
+
+        if( $result === false ){
+            error_log( "MF update error: " . $wpdb->last_error );
         }
         
-        return false;
+        return $result !== false;
+    }
+
+    /**
+     * Get a level by Id
+     * @param int $id Level I
+     * @return mixed
+     */
+    public function get_by_id(int $id){
+        global $wpdb;
+
+        // Use prepare to SQL injection safe
+        $sql = $wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE id = %d LIMIT 1",
+            $id
+        );
+
+        return $wpdb->get_row($sql);
+    }
+
+    /**
+     * Delete a level by ID
+     * @param int $id Level ID
+     * @return bool
+     */
+    public function delete(int $id): bool {
+        global $wpdb;
+        // id ভিত্তিক delete, format %d মানে integer binding
+        $resutl = $wpdb->delete(
+            $this->table,
+            ['id' => $id],
+            ['%d']
+        );
+
+        // wpdb false দিলে query fail, অন্যথায় success হিসেবে true
+        return $resutl !== false;
     }
 
     /**
@@ -82,5 +124,37 @@ class LevelRepository implements LevelRepositoryInterface{
             }
         }
         return $format;
+    }
+
+    /**
+     * Generate a unique slug from level name
+     * যদি একই slug আগে থেকে থাকে, তাহলে -2, -3 suffix যোগ করবে
+     */
+    private function generate_unique_slug( string $name ): string {
+        global $wpdb;
+
+        // base slug:: "Gold Plan" => "gold-plan"
+        $base_slug = sanitize_title( $name );
+
+        // If name empty then fallback slug
+        if( empty( $base_slug ) ){
+            $base_slug = 'level';
+        }
+
+        $slug = $base_slug;
+        $counter = 2;
+
+        // যতক্ষণ current slug already exists, ততক্ষণ নতুন suffix দিয়ে retry
+        while ( $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$this->table} WHERE slug = %s LIMIT 1",
+                $slug
+            )
+        ) ) {
+            $slug = $base_slug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

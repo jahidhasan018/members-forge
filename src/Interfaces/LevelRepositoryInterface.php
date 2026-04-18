@@ -25,4 +25,20 @@ interface LevelRepositoryInterface {
      * @return array Return details of a level
      */
     public function get_levels(): array;
+
+    /**
+     * Get a level
+     * 
+     * @param int $id Level ID to get
+     * @return bool True on success, false on failure
+     */
+    public function get_by_id(int $id);
+
+       /**
+     * Delete a level
+     * 
+     * @param int $id Level ID to delete
+     * @return bool True on success, false on failure
+     */
+    public function delete(int $id): bool;
 }

@@ -41,18 +41,40 @@ class ApiRouter implements ModuleInterface
 
     public function register_routes()
     {
+        // Get Statastics
         register_rest_route(self::NAMESPACE, 'stats', [
             'methods'               => 'GET',
             'callback'              => [$this->stats_controller, 'get_stats'],
             'permission_callback'   => [$this, 'check_admin_permission']
         ]);
 
-        // --- Levels Route ---
+        // --- Levels Colletion Routes (GET list, POST create) ---
         register_rest_route( self::NAMESPACE, '/levels', [
-            'methods'               => 'GET',
-            'callback'              => [$this->levels_controller, 'get_items'],
-            'permission_callback'   => [$this, 'check_admin_permission']
-        ] );
+            [
+                'methods'               => 'GET',
+                'callback'              => [$this->levels_controller, 'get_items'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ],
+            [
+                'methods'               => 'POST',
+                'callback'              => [$this->levels_controller, 'create_item'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ]
+        ]);
+
+        // --- Levels Single Item Routes (PUT update, Delete remove) ---
+        register_rest_route( self::NAMESPACE, '/levels/(?P<id>\d+)', [
+            [
+                'methods'               => 'PUT',
+                'callback'              => [$this->levels_controller, 'update_item'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ],
+            [
+                'methods'               => 'DELETE',
+                'callback'              => [$this->levels_controller, 'delete_item'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ]
+        ]);
     }
 
     public function check_admin_permission()

@@ -40,13 +40,61 @@ if ( ! class_exists( 'WP_REST_Response' ) ) {
 if ( ! class_exists( 'WP_REST_Request' ) ) {
     class WP_REST_Request {
         private $params = [];
-        
-        public function get_param( $key ) {
-            return $this->params[$key] ?? null;
+        private $body_params = [];
+        private $json_params = [];
+        private $method = [];
+        private $route = [];
+
+        public function __construct( $method = 'GET', $route = ''){
+            $this->method = $method;
+            $this->route  = $route;
         }
         
+                // Generic param getter (URL + body + json fallback)
+        public function get_param( $key ) {
+            if ( array_key_exists( $key, $this->params ) ) {
+                return $this->params[ $key ];
+            }
+
+            if ( array_key_exists( $key, $this->body_params ) ) {
+                return $this->body_params[ $key ];
+            }
+
+            if ( array_key_exists( $key, $this->json_params ) ) {
+                return $this->json_params[ $key ];
+            }
+
+            return null;
+        }
+        
+        // Single param setter (id etc)
         public function set_param( $key, $value ) {
-            $this->params[$key] = $value;
+            $this->params[ $key ] = $value;
+        }
+
+        // WP-like helper: route params set করার জন্য
+        public function set_url_params( array $params ) {
+            foreach ( $params as $key => $value ) {
+                $this->params[ $key ] = $value;
+            }
+        }
+
+        // Body params support (form/body payload)
+        public function set_body_params( array $params ) {
+            $this->body_params = $params;
+        }
+
+        public function get_body_params() {
+            return $this->body_params;
+        }
+
+        // JSON params support (if any test/controller uses it)
+        public function set_json_params( array $params ) {
+            $this->json_params = $params;
+        }
+
+        public function get_json_params() {
+            return $this->json_params;
         }
     }
 }
