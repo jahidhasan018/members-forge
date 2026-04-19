@@ -52,6 +52,7 @@ class LevelsController extends AbstractController {
 
         // Sanitize and prepare data
         $data = $this->parse_level_data( $raw );
+        $data = apply_filters('members_forge_rest_create_level_data', $data, $request);
 
         // Call repository to insert the level
         $level_id = $this->repository->create( $data );
