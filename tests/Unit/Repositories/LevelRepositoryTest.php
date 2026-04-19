@@ -35,6 +35,7 @@ class LevelRepositoryTest extends TestCase {
         global $wpdb;
         $wpdb = Mockery::mock('\wpdb');
         Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
+        Functions\when('wp_cache_delete')->justReturn(true);
         Functions\when('wp_parse_args')->alias(function($args, $defaults) {
             return array_merge($defaults, $args);
         });
@@ -76,7 +77,10 @@ class LevelRepositoryTest extends TestCase {
 
     /** @test */
     public function it_can_fetch_all_levels(){
-        global $wpdb; 
+        global $wpdb;
+        Functions\when('wp_cache_get')->justReturn(false);
+        Functions\when('wp_cache_set')->justReturn(true);
+        Functions\when('apply_filters')->alias(function($hook, $value) { return $value; });
         $wpdb = Mockery::mock('\wpdb');
         $wpdb->prefix = 'wp_';
 
@@ -101,6 +105,7 @@ class LevelRepositoryTest extends TestCase {
     /** @test */
     public function it_can_update_an_existing_level(){
         global $wpdb;
+        Functions\when('wp_cache_delete')->justReturn(true);
         $wpdb = Mockery::mock('\wpdb');
         $wpdb->prefix = 'wp_';
 
@@ -146,7 +151,9 @@ class LevelRepositoryTest extends TestCase {
     /** @test */
     public function it_can_get_a_single_level_by_id(){
         global $wpdb;
-
+        Functions\when('wp_cache_get')->justReturn(false);
+        Functions\when('wp_cache_set')->justReturn(true);
+        Functions\when('apply_filters')->alias(function($hook, $value) { return $value; });
         $wpdb = Mockery::mock('\wpdb');
         $wpdb->prefix = "wp_";
 
@@ -181,7 +188,7 @@ class LevelRepositoryTest extends TestCase {
     /** @test */
     public function it_can_delete_an_existing_level(){
         global $wpdb;
-
+        Functions\when('wp_cache_delete')->justReturn(true);
         $wpdb = Mockery::mock('\wpdb');
         $wpdb->prefix = 'wp_';
 
@@ -219,6 +226,7 @@ class LevelRepositoryTest extends TestCase {
     /** @test */
     public function it_treats_update_zero_afffected_rows_as_success(){
         global $wpdb;
+        Functions\when('wp_cache_delete')->justReturn(true);
         $wpdb = Mockery::mock('\wpdb');
         $wpdb->prefix = 'wp_';
 
@@ -247,6 +255,7 @@ class LevelRepositoryTest extends TestCase {
         global $wpdb;
         $wpdb = Mockery::mock('\wpdb');
         Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
+        Functions\when('wp_cache_delete')->justReturn(true);
         Functions\when('wp_parse_args')->alias(function($args, $defaults) {
             return array_merge($defaults, $args);
         });
@@ -294,6 +303,7 @@ class LevelRepositoryTest extends TestCase {
         global $wpdb;
         $wpdb = Mockery::mock('\wpdb');
         Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
+        Functions\when('wp_cache_delete')->justReturn(true);
         Functions\when('wp_parse_args')->alias(function($args, $defaults) {
             return array_merge($defaults, $args);
         });
@@ -333,5 +343,82 @@ class LevelRepositoryTest extends TestCase {
         $id = $repo->create(['name' => 'Gold Plan', 'price' => 50]);
 
         $this->assertEquals(6, $id);
+    }
+
+    /** @test */
+    public function it_invalidates_cache_and_fires_action_on_create() {
+        Functions\when('wp_parse_args')->alias(function($a, $b){ return array_merge($b, $a);});
+        Functions\when('current_time')->justReturn('2026-01-01 00:00:00');
+        Functions\when('sanitize_title')->returnArg();
+        Functions\when('wp_cache_get')->justReturn(false);
+
+        // Cache delete
+        Functions\expect('wp_cache_delete')
+            ->once()
+            ->with('members_forge_levels_all', 'members_forge');
+
+        // Action fire $id, $data
+        \Brain\Monkey\Actions\expectDone('members_forge_level_created')
+            ->once();
+
+         $wpdb = Mockery::mock('wpdb');
+        $wpdb->prefix = 'wp_';
+        $wpdb->insert_id = 5;
+        $wpdb->shouldReceive('get_var')->andReturn(null); // slug unique
+        $wpdb->shouldReceive('prepare')->andReturnArg(0);
+        $wpdb->shouldReceive('insert')->andReturn(1);
+
+        $GLOBALS['wpdb'] = $wpdb;
+         $repo = new LevelRepository();
+        $result = $repo->create(['name' => 'Gold']);
+
+        $this->assertEquals(5, $result);
+    }
+
+    /** @test */
+    public function it_returns_cached_levels_without_db_query() {
+        $cached_levels = [
+            (object) ['id' => 1, 'name' => 'Silver'],
+        ];
+
+        // Cache hit simulate
+        Functions\when('wp_cache_get')
+            ->justReturn($cached_levels);
+
+        $wpdb = Mockery::mock('wpdb');
+        $wpdb->prefix = 'wp_';
+        // DB query হওয়া উচিত না
+        $wpdb->shouldNotReceive('get_results');
+        $GLOBALS['wpdb'] = $wpdb;
+
+        $repo = new LevelRepository();
+        $result = $repo->get_levels();
+
+        $this->assertCount(1, $result);
+        $this->assertEquals('Silver', $result[0]->name);
+    }
+
+    /** @test */
+    public function it_fires_deleted_action_with_id_on_delete() {
+        Functions\when('wp_cache_delete')->justReturn(true);
+
+        // $id সহ action fire হওয়া উচিত
+        \Brain\Monkey\Actions\expectDone('members_forge_level_deleted')
+            ->once()
+            ->with(7);
+
+        \Brain\Monkey\Actions\expectDone('members_forge_before_level_deleted')
+            ->once()
+            ->with(7);
+
+        $wpdb = Mockery::mock('wpdb');
+        $wpdb->prefix = 'wp_';
+        $wpdb->shouldReceive('delete')->andReturn(1);
+        $GLOBALS['wpdb'] = $wpdb;
+
+        $repo = new LevelRepository();
+        $result = $repo->delete(7);
+
+        $this->assertTrue($result);
     }
 }

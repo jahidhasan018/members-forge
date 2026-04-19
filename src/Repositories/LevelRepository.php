@@ -6,9 +6,12 @@ use MembersForge\Interfaces\LevelRepositoryInterface;
 class LevelRepository implements LevelRepositoryInterface {
     private $table;
 
+    private $cache_group;
+
     public function __construct() {
         global $wpdb;
         $this->table = $wpdb->prefix . 'members_forge_levels';
+        $this->cache_group = 'members_forge';
     }
 
     /**
@@ -35,6 +38,9 @@ class LevelRepository implements LevelRepositoryInterface {
 
         // Inserted item id
         if ( $result ) {
+            wp_cache_delete('members_forge_levels_all', $this->cache_group);
+            do_action('members_forge_level_created', $wpdb->insert_id, $item);
+
             return $wpdb->insert_id;
         }
 
@@ -44,11 +50,25 @@ class LevelRepository implements LevelRepositoryInterface {
 
     // Return type added to match interface
     public function get_levels(): array{
+        $cache_key = 'members_forge_levels_all';
+
+        // Cache Check
+        $cached = wp_cache_get( $cache_key, $this->cache_group );
+        if( $cached !== false ){
+            return $cached;
+        }
+
         global $wpdb;
-
         $sql = "SELECT * FROM {$this->table} ORDER BY priority DESC, id ASC";
+        $levels = $wpdb->get_results($sql);
 
-        return $wpdb->get_results($sql);
+        // 2. Filter: অন্য plugin levels array modify করতে পারবে
+        $levels = apply_filters('members_forge_levels', $levels);
+
+        // Store cache for 1 hour
+        wp_cache_set( $cache_key, $levels, $this->cache_group, HOUR_IN_SECONDS );
+
+        return $levels;
     }
 
     /**
@@ -59,6 +79,8 @@ class LevelRepository implements LevelRepositoryInterface {
      * @return bool True on success, false on failure
      */
     public function update( int $id, array $data ): bool {
+        $data = apply_filters('members_forge_pre_update_level', $data, $id );
+
         global $wpdb;
         $result = false;
 
@@ -67,8 +89,11 @@ class LevelRepository implements LevelRepositoryInterface {
             $result  = $wpdb->update( $this->table, $data, ['id' => $id], $format, ['%d'] );
         }
 
-        if( $result === false ){
-            error_log( "MF update error: " . $wpdb->last_error );
+        if( $result !== false ){
+            wp_cache_delete('members_forge_levels_all', $this->cache_group);
+            wp_cache_delete("members_forge_level_{$id}", $this->cache_group);
+
+            do_action( 'members_forge_level_updated', $id, $data );
         }
         
         return $result !== false;
@@ -80,6 +105,12 @@ class LevelRepository implements LevelRepositoryInterface {
      * @return mixed
      */
     public function get_by_id(int $id){
+        $cache_key = "members_forge_level_{$id}";
+        $cached = wp_cache_get($cache_key, $this->cache_group);
+        if( $cached !== false ){
+            return $cached;
+        }
+
         global $wpdb;
 
         // Use prepare to SQL injection safe
@@ -87,8 +118,14 @@ class LevelRepository implements LevelRepositoryInterface {
             "SELECT * FROM {$this->table} WHERE id = %d LIMIT 1",
             $id
         );
+        $level = $wpdb->get_row($sql);
 
-        return $wpdb->get_row($sql);
+        if( $level ){
+            $level = apply_filters('members_forge_level', $level, $id);
+            wp_cache_set($cache_key, $level, $this->cache_group);
+        }
+
+        return $level;
     }
 
     /**
@@ -97,6 +134,8 @@ class LevelRepository implements LevelRepositoryInterface {
      * @return bool
      */
     public function delete(int $id): bool {
+        do_action('members_forge_before_level_deleted', $id);
+
         global $wpdb;
         // id ভিত্তিক delete, format %d মানে integer binding
         $resutl = $wpdb->delete(
@@ -104,6 +143,13 @@ class LevelRepository implements LevelRepositoryInterface {
             ['id' => $id],
             ['%d']
         );
+
+        if( $resutl !== false ){
+            wp_cache_delete('members_forge_levels_all', 'members_forge');
+            wp_cache_delete("members_forge_level_{$id}", 'members_forge');
+
+            do_action('members_forge_level_deleted', $id);
+        }
 
         // wpdb false দিলে query fail, অন্যথায় success হিসেবে true
         return $resutl !== false;
