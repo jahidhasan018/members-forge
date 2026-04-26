@@ -6,6 +6,11 @@
 // ১. কম্পোজার অটোলৌডার লোড করা
 require_once dirname( __DIR__ ) . '/vendor/autoload.php';
 
+// WordPress Constants
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
+    define( 'HOUR_IN_SECONDS', 3600 );
+}
+
 // ২. Brain Monkey সেটআপ (WordPress ফাংশন মক করার জন্য)
 Brain\Monkey\setUp();
 
