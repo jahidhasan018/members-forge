@@ -5,6 +5,7 @@ namespace MembersForge\API;
 use MembersForge\Interfaces\ModuleInterface;
 use MembersForge\API\Controllers\StatsController;
 use MembersForge\API\Controllers\LevelsController;
+use MembersForge\API\Controllers\MembershipsController;
 
 class ApiRouter implements ModuleInterface
 {
@@ -20,6 +21,11 @@ class ApiRouter implements ModuleInterface
     private $levels_controller;
 
     /**
+     * $var MembershipsController
+     */
+    private $memberships_controller;
+
+    /**
      * API Namespace
      */
 
@@ -28,10 +34,14 @@ class ApiRouter implements ModuleInterface
     /**
      * Constructor Injection
      */
-    public function __construct(StatsController $stats_controller, LevelsController $levels_controller)
-    {
+    public function __construct(
+        StatsController $stats_controller, 
+        LevelsController $levels_controller,
+        MembershipsController $memberships_controller
+    ){
         $this->stats_controller     = $stats_controller;
         $this->levels_controller    = $levels_controller;
+        $this->memberships_controller = $memberships_controller;
     }
 
     public function init(): void
@@ -73,6 +83,40 @@ class ApiRouter implements ModuleInterface
                 'methods'               => 'DELETE',
                 'callback'              => [$this->levels_controller, 'delete_item'],
                 'permission_callback'   => [$this, 'check_admin_permission']
+            ]
+        ]);
+
+        // --- Memberships: POST create, GET by user ---
+        register_rest_route( self::NAMESPACE, '/memberships', [
+            [
+                'methods'               => 'POST',
+                'callback'              => [$this->memberships_controller, 'create_item'],
+                'permission_callback'   => '__return_true'
+            ]
+        ]);
+
+        register_rest_route( self::NAMESPACE, '/memberships/user/(?P<user_id>\d+)', [
+            [
+                'methods'               => 'GET',
+                'callback'              => [$this->memberships_controller, 'get_user_memberships'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ]
+        ]);
+
+        // --- Memberships: PUT status, DELETE ---
+        register_rest_route( self::NAMESPACE, '/memberships/(?P<id>\d+)/status', [
+            [
+                'methods'             => 'PUT',
+                'callback'            => [$this->memberships_controller, 'update_status'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ]
+        ]);
+
+        register_rest_route( self::NAMESPACE, '/memberships/(?P<id>\d+)', [
+            [
+                'methods'             => 'DELETE',
+                'callback'            => [$this->memberships_controller, 'delete_item'],
+                'permission_callback' => [$this, 'check_admin_permission'],
             ]
         ]);
     }
