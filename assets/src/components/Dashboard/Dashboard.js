@@ -1,16 +1,13 @@
-import { useState, useEffect } from '@wordpress/element';
-import {
-    Spinner,
-    Button,
-    SelectControl,
-    SnackbarList,
-    Card as WPCard,
-    CardHeader,
-    CardBody,
-    __experimentalText as Text,
-} from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import {
+    Button,
+    CardBody,
+    Spinner,
+    __experimentalText as Text,
+    Card as WPCard
+} from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 import Card from '../UI/Card';
 
@@ -88,8 +85,6 @@ const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [notices, setNotices] = useState([]);
-    const [chartPeriod, setChartPeriod] = useState('6months');
 
     useEffect(() => {
         apiFetch({ path: '/members-forge/v1/stats' })
@@ -104,10 +99,6 @@ const Dashboard = () => {
                 setLoading(false);
             });
     }, []);
-
-    const removeNotice = (id) => {
-        setNotices(notices.filter((notice) => notice.id !== id));
-    };
 
     // Loading State
     if (loading) {
@@ -156,69 +147,23 @@ const Dashboard = () => {
             {/* Stats Grid - Responsive: 1 col mobile, 2 col tablet, 4 col desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-8">
                 <StatCard
-                    label={__('Monthly Recurring Revenue', 'members-forge')}
-                    value={stats.total_revenue}
-                    prefix="$"
-                    change="12.5%"
-                    changeType="positive"
+                    label={__('Total Members', 'members-forge')}
+                    value={stats.total_members}
                 />
                 <StatCard
                     label={__('Active Members', 'members-forge')}
                     value={stats.active_members}
-                    change="+3.2%"
                     changeType="positive"
                 />
                 <StatCard
-                    label={__('Churn Rate', 'members-forge')}
-                    value={stats.churn_rate}
-                    suffix="%"
-                    change="-0.5%"
+                    label={__('Expired Members', 'members-forge')}
+                    value={stats.expired_members}
                     changeType="negative"
                 />
                 <StatCard
-                    label={__('Avg. LTV', 'members-forge')}
-                    value={stats.avg_ltv}
-                    prefix="$"
-                    change="+8.1%"
-                    changeType="positive"
+                    label={__('Pending Members', 'members-forge')}
+                    value={stats.pending_members}
                 />
-            </div>
-
-            {/* Charts Section - Responsive: stack on mobile, side-by-side on desktop */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
-                {/* Revenue Over Time - Takes 2/3 width on desktop */}
-                <div className="xl:col-span-2">
-                    <Card title={__('Revenue Over Time', 'members-forge')}>
-                        <div className="flex items-end justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-brand-600"></span>
-                                <Text size={12} className="text-slate-500">
-                                    {__('Revenue', 'members-forge')}
-                                </Text>
-                            </div>
-                            <SelectControl
-                                value={chartPeriod}
-                                options={[
-                                    { label: __('Last 6 Months', 'members-forge'), value: '6months' },
-                                    { label: __('Last 12 Months', 'members-forge'), value: '12months' },
-                                    { label: __('This Year', 'members-forge'), value: 'year' },
-                                ]}
-                                onChange={setChartPeriod}
-                                __nextHasNoMarginBottom
-                                hideLabelFromVision
-                                size="compact"
-                            />
-                        </div>
-                        <ChartPlaceholder title="Revenue" colorClass="brand" />
-                    </Card>
-                </div>
-
-                {/* Member Growth - Takes 1/3 width on desktop */}
-                <div>
-                    <Card title={__('Member Growth', 'members-forge')}>
-                        <ChartPlaceholder title="Growth" colorClass="amber" />
-                    </Card>
-                </div>
             </div>
 
             {/* AI Promo Banner */}
@@ -247,15 +192,6 @@ const Dashboard = () => {
                         {__('Try Forge AI', 'members-forge')}
                     </Button>
                 </div>
-            </div>
-
-            {/* Notification Toaster */}
-            <div className="fixed bottom-5 right-5 z-9999 w-80">
-                <SnackbarList
-                    notices={notices}
-                    className="components-snackbar-list"
-                    onRemove={removeNotice}
-                />
             </div>
         </>
     );

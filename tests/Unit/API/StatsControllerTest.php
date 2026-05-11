@@ -1,6 +1,7 @@
 <?php
 namespace MembersForge\Tests\Unit\API;
 
+use Mockery;
 use PHPUnit\Framework\TestCase;
 use MembersForge\API\Controllers\StatsController;
 use Brain\Monkey\Functions;
@@ -25,23 +26,53 @@ class StatsControllerTest extends TestCase {
     }
 
     /** @test */
-    public function it_returns_dashboard_stats_structure() {
-        // ৩. WordPress ফাংশনগুলো মক করা
-        
-        Functions\when('get_transient')->justReturn(false);
-        Functions\when('set_transient')->justReturn(true);
-        Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
-        Functions\when('rest_ensure_response')->returnArg();
+    public function it_returns_cached_stats_without_db_query() {
+        // Cached data
+        $cached = [
+            'total_members'    => 100,
+            'active_members'   => 80,
+            'expired_members'  => 10,
+            'cancelled_members'=> 5,
+            'pending_members'  => 5,
+        ];
 
-        // ৪. এবার কন্ট্রোলার টেস্ট করা
+        Functions\when('get_transient')->justReturn($cached);
+        Functions\when('rest_ensure_response')->returnArg();
+        Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
+
         $controller = new StatsController();
         $response = $controller->get_stats();
 
-        // ৫. ভেরিফিকেশন
-        $this->assertInstanceOf(\WP_REST_Response::class, $response);
         $this->assertTrue($response->data['success']);
-        $this->assertArrayHasKey('active_members', $response->data['data']);
-        $this->assertArrayHasKey('total_revenue', $response->data['data']);
-        $this->assertArrayHasKey('cached_at', $response->data['data']);
+        // Cache থেকে এলে DB query হয়নি — তাই value same
+        $this->assertEquals(100, $response->data['data']['total_members']);
+        $this->assertEquals(80, $response->data['data']['active_members']);
+    }
+
+    /** @test */
+    public function it_queries_db_when_cache_is_empty() {
+        // Cache DB query
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('set_transient')->justReturn(true);
+        Functions\when('rest_ensure_response')->returnArg();
+        Functions\when('current_time')->justReturn('2026-02-05 12:00:00');
+
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->prefix = 'wp_';
+
+        $wpdb->shouldReceive('get_var')
+            ->times(5)
+            ->andReturn(10, 8, 1, 1, 0);
+
+        $controller = new StatsController();
+        $response = $controller->get_stats();
+
+        $this->assertTrue($response->data['success']);
+        $this->assertArrayHasKey('total_members',    $response->data['data']);
+        $this->assertArrayHasKey('active_members',   $response->data['data']);
+        $this->assertArrayHasKey('expired_members',  $response->data['data']);
+        $this->assertArrayHasKey('cancelled_members',$response->data['data']);
+        $this->assertArrayHasKey('pending_members',  $response->data['data']);
     }
 }
