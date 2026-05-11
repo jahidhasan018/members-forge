@@ -89,6 +89,11 @@ class ApiRouter implements ModuleInterface
         // --- Memberships: POST create, GET by user ---
         register_rest_route( self::NAMESPACE, '/memberships', [
             [
+                'methods'               => 'GET',
+                'callback'              => [$this->memberships_controller, 'get_all_memberships'],
+                'permission_callback'   => [$this, 'check_admin_permission']
+            ],
+            [
                 'methods'               => 'POST',
                 'callback'              => [$this->memberships_controller, 'create_item'],
                 'permission_callback'   => '__return_true'

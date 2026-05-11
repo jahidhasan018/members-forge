@@ -40,4 +40,10 @@ interface MembershipRepositoryInterface {
      * @return bool
      */
     public function delete(int $id): bool;
+
+    /**
+     * Get all memberships with user and level info (JOIN) for full members list
+     * @return array
+     */
+    public function get_all(): array;
 }

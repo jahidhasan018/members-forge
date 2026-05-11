@@ -1,7 +1,8 @@
 import { useState } from "@wordpress/element";
-import MainLayout from "./components/Layout/MainLayout";
 import Dashboard from "./components/Dashboard/Dashboard";
+import MainLayout from "./components/Layout/MainLayout";
 import Levels from "./components/Levels/Levels";
+import Members from "./components/Members/Members";
 
 const App = () => {
     const [activePage, setActivePage] = useState('dashboard');
@@ -13,7 +14,7 @@ const App = () => {
             case 'levels':
                 return <Levels />;
             case 'members':
-                return <div className="text-slate-500 text-center py-20">Coming Soon...</div>;
+                return <Members />;
             case 'modules':
                 return <div className="text-slate-500 text-center py-20">Modules Coming Soon...</div>;
             case 'form-builder':
