@@ -8,6 +8,7 @@ use MembersForge\Modules\Admin\AdminMenu;
 use MembersForge\API\Controllers\StatsController;
 use MembersForge\API\Controllers\LevelsController;
 use MembersForge\API\Controllers\MembershipsController;
+use MembersForge\API\Controllers\SettingsController;
 use MembersForge\Repositories\LevelRepository;
 use MembersForge\Repositories\MembershipRepository;
 use MembersForge\Database\Migrator;
@@ -41,7 +42,15 @@ class Plugin
         $membership_repository = new MembershipRepository();
         $memberships_controller = new MembershipsController($membership_repository);
 
-        $this->module_manager->register(new ApiRouter($stats_controller, $levels_controller, $memberships_controller));
+        // Settings controller
+        $settings_controller = new SettingsController();
+
+        $this->module_manager->register(new ApiRouter(
+            $stats_controller, 
+            $levels_controller, 
+            $memberships_controller,
+            $settings_controller
+        ));
 
         $this->module_manager->boot();
     }

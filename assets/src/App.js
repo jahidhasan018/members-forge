@@ -3,6 +3,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import MainLayout from "./components/Layout/MainLayout";
 import Levels from "./components/Levels/Levels";
 import Members from "./components/Members/Members";
+import Settings from "./components/Settings/Settings";
 
 const App = () => {
     const [activePage, setActivePage] = useState('dashboard');
@@ -22,7 +23,7 @@ const App = () => {
             case 'forge-ai':
                 return <div className="text-slate-500 text-center py-20">Forge Ai Coming Soon...</div>;
             case 'settings':
-                return <div className="text-slate-500 text-center py-20">Settings Coming Soon...</div>;
+                return <Settings />;
             default:
                 return <Dashboard />;
         }

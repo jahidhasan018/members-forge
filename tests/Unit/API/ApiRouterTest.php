@@ -2,6 +2,7 @@
 
 namespace MembersForge\Tests\Unit\API;
 
+use MembersForge\API\Controllers\SettingsController;
 use PHPUnit\Framework\TestCase;
 use MembersForge\API\ApiRouter;
 use MembersForge\API\Controllers\StatsController;
@@ -34,11 +35,13 @@ class ApiRouterTest extends TestCase
         $mock_stats_controller = $this->createMock(StatsController::class);
         $mock_level_controller = $this->createMock(LevelsController::class);
         $mock_memberships_controller = $this->createMock(MembershipsController::class);
+        $mock_settings_controller = $this->createMock( SettingsController::class );
 
         $router = new ApiRouter(
             $mock_stats_controller, 
             $mock_level_controller,
-            $mock_memberships_controller
+            $mock_memberships_controller,
+            $mock_settings_controller
         );
         $router->init();
 
@@ -55,11 +58,13 @@ class ApiRouterTest extends TestCase
         $mock_stats_controller = $this->createMock(StatsController::class);
         $mock_level_controller = $this->createMock(LevelsController::class);
         $mock_memberships_controller = $this->createMock(MembershipsController::class);
+        $mock_settings_controller = $this->createMock( SettingsController::class );
 
         $router = new ApiRouter(
             $mock_stats_controller, 
             $mock_level_controller,
-            $mock_memberships_controller
+            $mock_memberships_controller,
+            $mock_settings_controller
         );
 
         $this->assertTrue($router->check_admin_permission());
@@ -76,11 +81,13 @@ class ApiRouterTest extends TestCase
         $mock_stats_controller = $this->createMock(StatsController::class);
         $mock_level_controller = $this->createMock(LevelsController::class);
         $mock_memberships_controller = $this->createMock(MembershipsController::class);
+        $mock_settings_controller = $this->createMock( SettingsController::class );
 
         $router = new ApiRouter(
             $mock_stats_controller, 
             $mock_level_controller,
-            $mock_memberships_controller
+            $mock_memberships_controller,
+            $mock_settings_controller
         );
 
         $this->assertFalse($router->check_admin_permission());
@@ -89,17 +96,18 @@ class ApiRouterTest extends TestCase
     /** @test */
     public function it_registers_levels_crud_routes() {
         // Verifay how many args is passed in register_rest_route
-        Functions\expect('register_rest_route')->times(7); // stats + levels collection + levels single item
+        Functions\expect('register_rest_route')->times(8); // stats + levels collection + levels single item
 
         $mock_stats_controller = $this->createMock( StatsController::class );
         $mock_level_controller = $this->createMock( LevelsController::class );
-
         $mock_memberships_controller = $this->createMock(MembershipsController::class);
+        $mock_settings_controller = $this->createMock( SettingsController::class );
 
         $router = new ApiRouter(
             $mock_stats_controller, 
             $mock_level_controller,
-            $mock_memberships_controller
+            $mock_memberships_controller,
+            $mock_settings_controller
         );
         
         $router->register_routes();

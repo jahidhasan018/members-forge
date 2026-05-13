@@ -6,6 +6,7 @@ use MembersForge\Interfaces\ModuleInterface;
 use MembersForge\API\Controllers\StatsController;
 use MembersForge\API\Controllers\LevelsController;
 use MembersForge\API\Controllers\MembershipsController;
+use MembersForge\API\Controllers\SettingsController;
 
 class ApiRouter implements ModuleInterface
 {
@@ -24,6 +25,11 @@ class ApiRouter implements ModuleInterface
      * $var MembershipsController
      */
     private $memberships_controller;
+    
+    /**
+     * $var SettingsController
+     */
+    private $settings_controller;
 
     /**
      * API Namespace
@@ -37,11 +43,13 @@ class ApiRouter implements ModuleInterface
     public function __construct(
         StatsController $stats_controller, 
         LevelsController $levels_controller,
-        MembershipsController $memberships_controller
+        MembershipsController $memberships_controller,
+        SettingsController $settings_controller
     ){
         $this->stats_controller     = $stats_controller;
         $this->levels_controller    = $levels_controller;
         $this->memberships_controller = $memberships_controller;
+        $this->settings_controller = $settings_controller;
     }
 
     public function init(): void
@@ -124,6 +132,20 @@ class ApiRouter implements ModuleInterface
                 'permission_callback' => [$this, 'check_admin_permission'],
             ]
         ]);
+        
+        // --- Settings: GET সব settings, PUT settings save করো ---
+        register_rest_route( self::NAMESPACE, '/settings', [
+            [
+                'methods'           => 'GET',
+                'callback'          => [$this->settings_controller, 'get_settings'],
+                'permission_callback' => [$this, 'check_admin_permission']
+            ],
+            [
+                'methods'             => 'PUT',
+                'callback'            => [$this->settings_controller, 'update_settings'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ]
+        ] );
     }
 
     public function check_admin_permission()
