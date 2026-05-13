@@ -141,6 +141,39 @@ class MembershipRepository implements MembershipRepositoryInterface{
     }
 
     /**
+     * Get all memberships with user and level info (JOIN) for full members list
+     * @return array
+     */
+    public function get_all(): array {
+        $cache_key = "members_forge_all_memberships";
+        $cached = wp_cache_get( $cache_key, $this->cache_group );
+        if( $cached !== false ){
+            return $cached;
+        }
+
+        global $wpdb;
+
+        $levels_table = $wpdb->prefix . 'members_forge_levels';
+        $sql = "
+            SELECT
+                m.*,
+                u.display_name,
+                u.user_email,
+                l.name AS level_name
+            FROM {$this->table} AS m
+            INNER JOIN {$wpdb->users} AS u ON m.user_id = u.ID
+            INNER JOIN {$levels_table} AS l ON m.level_id = l.id
+            ORDER BY m.id DESC
+        ";
+
+        $results = $wpdb->get_results($sql);
+
+        wp_cache_set( $cache_key, $results, $this->cache_group, HOUR_IN_SECONDS );
+
+        return $results ?: [];
+    }
+
+    /**
      * Format the items value
      * @param array $data
      * @return string[]

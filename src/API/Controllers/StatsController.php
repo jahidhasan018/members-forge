@@ -17,13 +17,22 @@ class StatsController extends AbstractController {
             return $this->success_response( $cached_stats );
         }
 
+        global $wpdb;
+        $table = $wpdb->prefix . 'members_forge_memberships';
+
+        $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+        $active = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'active'" );
+        $expired   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'expired'" );
+        $cancelled = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'cancelled'" );
+        $pending   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'pending'" );
+
+
         $data = [
-            'active_members' => 1248,
-            'total_revenue'  => 24590,
-            'churn_rate'     => 2.4,
-            'avg_ltv'        => 420,
-            'growth_rate'    => 12.5,
-            'cached_at'      => current_time( 'mysql' )
+            'total_members'    => $total,
+            'active_members'   => $active,
+            'expired_members'  => $expired,
+            'cancelled_members'=> $cancelled,
+            'pending_members'  => $pending,
         ];
 
         set_transient( self::CACHE_KEY, $data, HOUR_IN_SECONDS );

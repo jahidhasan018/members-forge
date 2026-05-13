@@ -115,4 +115,13 @@ class MembershipsController extends AbstractController {
 
         return $this->success_response( ['deleted' => true, 'id' => $id], 200);
     }
+
+    /**
+     * GET /memberships — Admin: সব members list
+     * JOIN query র মাধ্যমে user ও level info সহ
+     */
+    public function get_all_memberships( WP_REST_Request $request ) {
+        $memberships = $this->repository->get_all();
+        return $this->success_response( $memberships );
+    }
 }

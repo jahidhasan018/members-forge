@@ -163,4 +163,39 @@ class MembershipsControllerTest extends TestCase {
         $this->assertTrue($response->data['success']);
         $this->assertEquals(200, $response->get_status());
     }
+
+    /** @test */
+    public function it_returns_all_memberships_with_user_and_level_info() {
+        Functions\when('rest_ensure_response')->returnArg();
+        Functions\when('current_user_can')->justReturn(true);
+
+        // JOIN query র মতো response — user ও level info সহ
+        $mock_data = [
+            (object) [
+                'id'           => 1,
+                'user_id'      => 10,
+                'status'       => 'active',
+                'display_name' => 'John Doe',
+                'user_email'   => 'john@example.com',
+                'level_name'   => 'Gold Plan',
+            ],
+        ];
+
+        $repo = Mockery::mock(MembershipRepository::class);
+        $repo->shouldReceive('get_all')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($mock_data);
+
+        $controller = new MembershipsController($repo);
+
+        $request = new \WP_REST_Request('GET', '/members-forge/v1/memberships');
+
+        $response = $controller->get_all_memberships($request);
+
+        $this->assertTrue($response->data['success']);
+        $this->assertCount(1, $response->data['data']);
+        $this->assertEquals('John Doe', $response->data['data'][0]->display_name);
+        $this->assertEquals('Gold Plan', $response->data['data'][0]->level_name);
+    }
 }

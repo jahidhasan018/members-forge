@@ -182,4 +182,51 @@ class MembershipRepositoryTest extends TestCase{
 
         $this->assertTrue($result);
     }
+
+    /** @test */
+    public function it_can_get_all_memberships_with_user_and_level_info(){
+        global $wpdb;
+        $wpdb = Mockery::mock('\wpdb');
+        $wpdb->users = 'wp_users';
+        $wpdb->prefix = 'wp_';
+
+        Functions\when('wp_cache_get')->justReturn(false);
+        Functions\when('wp_cache_set')->justReturn(true);
+
+        // JOIN query র result — user এবং level info সহ
+        $mock_data = [
+            (object) [
+                'id'           => 1,
+                'user_id'      => 10,
+                'level_id'     => 1,
+                'status'       => 'active',
+                'display_name' => 'John Doe',
+                'user_email'   => 'john@example.com',
+                'level_name'   => 'Gold Plan',
+            ],
+            (object) [
+                'id'           => 2,
+                'user_id'      => 11,
+                'level_id'     => 2,
+                'status'       => 'expired',
+                'display_name' => 'Jane Smith',
+                'user_email'   => 'jane@example.com',
+                'level_name'   => 'Silver Plan',
+            ],
+        ];
+
+        // get_results will be called once for JOIN query
+        $wpdb->shouldReceive('get_results')
+            ->once()
+            ->with(Mockery::type('string'))
+            ->andReturn($mock_data);
+
+        $repo =  new MembershipRepository();
+        $result = $repo->get_all();
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+        $this->assertEquals('John Doe', $result[0]->display_name);
+        $this->assertEquals('Gold Plan', $result[0]->level_name);
+    }
 }

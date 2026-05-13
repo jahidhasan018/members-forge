@@ -148,7 +148,6 @@ span#footer-thankyou {
 .mf-app-container button {
     cursor: pointer;
     outline: none;
-    background: transparent;
 }
 
 .mf-app-container button:focus {
