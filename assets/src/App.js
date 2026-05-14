@@ -3,6 +3,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import MainLayout from "./components/Layout/MainLayout";
 import Levels from "./components/Levels/Levels";
 import Members from "./components/Members/Members";
+import Modules from "./components/Modules/Modules";
 import Settings from "./components/Settings/Settings";
 
 const App = () => {
@@ -17,7 +18,7 @@ const App = () => {
             case 'members':
                 return <Members />;
             case 'modules':
-                return <div className="text-slate-500 text-center py-20">Modules Coming Soon...</div>;
+                return <Modules />;
             case 'form-builder':
                 return <div className="text-slate-500 text-center py-20">Form Builder Coming Soon...</div>;
             case 'forge-ai':
