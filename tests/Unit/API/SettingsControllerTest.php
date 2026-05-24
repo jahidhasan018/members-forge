@@ -4,6 +4,7 @@ namespace MembersForge\Tests\Unit\API;
 use PHPUnit\Framework\TestCase;
 use MembersForge\API\Controllers\SettingsController;
 use Brain\Monkey\Functions;
+use Mockery;
 
 class SettingsControllerTest extends TestCase {
     protected function setUp(): void {
@@ -13,6 +14,7 @@ class SettingsControllerTest extends TestCase {
 
     protected function tearDown(): void {
         \Brain\Monkey\tearDown();
+        Mockery::close();
         parent::tearDown();
     }
 
