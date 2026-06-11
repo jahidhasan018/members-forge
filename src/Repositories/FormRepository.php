@@ -10,7 +10,7 @@ class FormRepository implements FormRepositoryInterface {
     private $wpdb;
     private $table;
 
-    private const ALLOWED_COLUMNS = [
+    public const ALLOWED_COLUMNS = [
         'name',
         'type',
         'fields',
@@ -33,7 +33,8 @@ class FormRepository implements FormRepositoryInterface {
     public function get_all(): array {
         $sql = "SELECT * FROM {$this->table} ORDER BY id DESC";
 
-        $results = $this->wpdb->get_results( $sql, self::ARRAY_OUTPUT );
+        $data = $this->wpdb->get_results( $sql, self::ARRAY_OUTPUT );
+        $results = $this->prepare_for_persistence($data);
 
         if ( ! is_array( $results ) ) {
             return [];
@@ -51,7 +52,8 @@ class FormRepository implements FormRepositoryInterface {
         $sql = "SELECT * FROM {$this->table} WHERE id = %d";
 
         // Repository contract array return করে, তাই wpdb result array হিসেবে নাও।
-        $result = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $id ), self::ARRAY_OUTPUT );
+        $data = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $id ), self::ARRAY_OUTPUT );
+        $result = $this->prepare_for_persistence($data);
 
         return $result;
     }
@@ -65,7 +67,8 @@ class FormRepository implements FormRepositoryInterface {
         $sql = "SELECT * FROM {$this->table} WHERE shortcode_key = %s";
 
         // Shortcode lookup frontend render path এ যাবে, তাই stable array shape maintain করি।
-        $result = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $key ), self::ARRAY_OUTPUT );
+        $data = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $key ), self::ARRAY_OUTPUT );
+        $result = $this->prepare_for_persistence($data);
 
         return $result;
     }

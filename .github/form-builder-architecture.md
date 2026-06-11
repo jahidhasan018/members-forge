@@ -314,12 +314,21 @@ onFormSave(formData)
 
 ---
 
+## Progress Update
+
+- `TASK-07` complete: forms table schema added to `Migrator.php`
+- `TASK-08` foundation complete: `FormRepositoryInterface`, `FormRepository`, and unit tests added
+- Repository currently supports CRUD shape, timestamp persistence, allowed column filtering, and JSON encoding on write
+- Remaining repository decision: read methods should eventually return a single normalized shape for `fields` and `settings`
+
+---
+
 ## Task List (Implementation Order)
 
 | Task | কাজ | Status |
 |------|-----|--------|
 | TASK-07 | Migrator.php — `wp_members_forge_forms` table add | ✅ |
-| TASK-08 | `FormRepository` + interface + unit test | ✅ |
+| TASK-08 | `FormRepository` + interface + unit test | ✅ Foundation Done |
 | TASK-09 | `FormService` + unit test | ❌ |
 | TASK-10 | `FormController` + unit test | ❌ |
 | TASK-11 | `FieldRegistry` — field types register | ❌ |
