@@ -7,7 +7,8 @@ use WP_REST_Request;
 class SettingsController extends AbstractController {
 
     // Option Key to store Settings
-    const OPTION_KEY = 'members_forge_settings';
+    const OPTION_KEY  = 'members_forge_settings';
+    const MODULES_KEY = 'members_forge_modules';
 
     /**
      * Get defaults settings if users dosen't save/change anything
@@ -40,6 +41,18 @@ class SettingsController extends AbstractController {
                 'login_page_id'        => 0,
                 'after_login_redirect' => 'account',
             ],
+        ];
+    }
+
+    // Get default modules
+    public function get_default_modules() {
+        return [
+            'coupon_codes'      => false,
+            'trial_period'      => false,
+            'email_reminders'   => false,
+            'custom_fields'     => false,
+            'member_directory'  => false,
+            'content_restriction' => false,
         ];
     }
 
@@ -83,5 +96,46 @@ class SettingsController extends AbstractController {
         $final = array_replace_recursive( $this->get_defaults(), $updated );
 
         return $this->success_response( $final );
+    }
+
+    /**
+     * GET /modules - Get modules settings
+     */
+    public function get_modules() {
+        $modules = get_option( self::MODULES_KEY, [] );
+        if( ! is_array($modules) ) {
+            $modules = [];
+        }
+
+        $merged = array_merge( $this->get_default_modules(), $modules );
+
+        return $this->success_response($merged);
+    }
+
+    /**
+     * PUT /modules - Update modules
+     */
+    public function update_modules( WP_REST_Request $request ) {
+        $params = $request->get_json_params();
+        // Get an array of all keys
+        $keys = array_keys( $params );
+
+        $allowed = ['coupon_codes','trial_period','email_reminders','custom_fields','member_directory','content_restriction'];
+        if( array_diff( $keys, $allowed ) ){
+            return $this->error_response("The keys is not allowed", 400);
+        }
+
+        $saved = get_option(self::MODULES_KEY, []);
+        if( ! is_array($saved) ) {
+            $saved = [];
+        }
+        $merged = array_merge($saved, $params);
+
+        $updated = update_option(self::MODULES_KEY, $merged);
+        if( ! $updated ){
+            return $this->error_response('Failed to save modules.', 500);
+        }
+
+        return $this->success_response( $merged );
     }
 }

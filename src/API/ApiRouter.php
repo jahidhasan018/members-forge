@@ -145,7 +145,23 @@ class ApiRouter implements ModuleInterface
                 'callback'            => [$this->settings_controller, 'update_settings'],
                 'permission_callback' => [$this, 'check_admin_permission'],
             ]
-        ] );
+        ]);
+
+        
+
+        // --- Modules: GET all modules, PUT save modules ---
+        register_rest_route( self::NAMESPACE, '/modules', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [$this->settings_controller, 'get_modules'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ],
+            [
+                'methods'             => 'PUT',
+                'callback'            => [$this->settings_controller, 'update_modules'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ]
+        ]);
     }
 
     public function check_admin_permission()

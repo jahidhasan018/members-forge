@@ -584,3 +584,15 @@ span#footer-thankyou {
     color: var(--color-slate-500);
     cursor: not-allowed;
 }
+
+/* Snackbar Position */
+.mf-snackbar {
+    position: fixed !important;
+    right: 20px;
+    bottom: 20px;
+    left: auto !important;
+    top: auto !important;
+
+    z-index: 999999;
+    max-width: 320px;
+}

@@ -16,7 +16,12 @@ class Migrator {
         $sql_memberships = self::get_schema_memberships($wpdb->prefix, $charset);
         $sql_member_meta = self::get_schema_membersmeta($wpdb->prefix, $charset);
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        // Form Table
+        $sql_forms = self::get_schema_forms($wpdb->prefix, $charset);
+
+        if ( defined( 'ABSPATH' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        }
 
         // Create Levels and Level meta table
         dbDelta( $sql_levels );
@@ -26,13 +31,16 @@ class Migrator {
         dbDelta( $sql_memberships );
         dbDelta( $sql_member_meta );
 
-        update_option( 'members_forge_db_version', '1.1.0' );
+        // Create Form table
+        dbDelta( $sql_forms );
+
+        update_option( 'members_forge_db_version', '1.3.0' );
     }
 
     /**
      * Schema for members_levels table
-     * @param mixed $prefix, $charset
-     * @return void
+     * @param $prefix, $charset
+     * @return string
      */
     private static function get_schema_members_levels( $prefix, $charset ): string{
         $table_levels = $prefix . "members_forge_levels";
@@ -62,8 +70,8 @@ class Migrator {
 
     /**
      * Schema for levelmeta table
-     * @param mixed $prefix, $charset
-     * @return void
+     * @param $prefix, $charset
+     * @return string
      */
     private static function get_schema_levelmeta( $prefix, $charset ):  string{
         $table_levelmeta = $prefix . 'members_forge_levelmeta';
@@ -82,8 +90,8 @@ class Migrator {
 
     /**
      * Schema for memberships table
-     * @param mixed $prefix, $charset
-     * @return void
+     * @param $prefix, $charset
+     * @return string
      */
     private static function get_schema_memberships( $prefix, $charset ): string{
         $table = $prefix . 'members_forge_memberships';
@@ -115,8 +123,8 @@ class Migrator {
 
     /**
      * Schema for member_meta table
-     * @param mixed $prefix, $charset
-     * @return void
+     * @param $prefix, $charset
+     * @return string
      */
     private static function get_schema_membersmeta( $prefix, $charset ): string{
         $table = $prefix . 'members_forge_member_meta';
@@ -130,6 +138,36 @@ class Migrator {
             KEY user_id (user_id),
             KEY meta_key (meta_key)
         ) $charset;";
+
+        return $sql;
+    }
+
+    /**
+     * Schema for members_forge_forms table
+     * @param $prefix, $charset
+     * @return string
+     */
+    private static function get_schema_forms( $prefix, $charset ): string {
+        $table = $prefix . 'members_forge_forms';
+
+        $sql = "CREATE TABLE {$table} (
+            id BIGINT(20) NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            type VARCHAR(50) NOT NULL,
+            fields LONGTEXT,
+            settings LONGTEXT,
+            shortcode_key VARCHAR(100) NOT NULL,
+            status VARCHAR(20) DEFAULT 'draft',
+            schema_version INT(11) DEFAULT 1,
+            created_by BIGINT(20) DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY type (type),
+            KEY status (status),
+            UNIQUE KEY shortcode_key (shortcode_key),
+            KEY created_by (created_by)
+        ) {$charset};";
 
         return $sql;
     }
