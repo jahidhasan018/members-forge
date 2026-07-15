@@ -22,17 +22,22 @@ class ShortcodeRenderer {
 
     public function init(): void {
         add_shortcode( 'mf_form', [ $this, 'render' ] );
+        add_shortcode( 'members_forge_form', [ $this, 'render' ] );
         add_action( 'template_redirect', [ $this, 'handle_submission' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ] );
     }
 
     public function enqueue_styles(): void {
+        $handle = apply_filters( 'members_forge_frontend_style_handle', 'members-forge-frontend' );
+
         wp_enqueue_style(
-            'members-forge-frontend',
+            $handle,
             plugins_url( 'assets/src/frontend.css', MF_PLUGIN_FILE ),
-            [],
-            '1.0.0'
+            apply_filters( 'members_forge_frontend_style_deps', [] ),
+            apply_filters( 'members_forge_frontend_style_version', '1.0.0' )
         );
+
+        do_action( 'members_forge_after_enqueue_styles' );
     }
 
     public function handle_submission(): void {
@@ -52,14 +57,12 @@ class ShortcodeRenderer {
             return;
         }
 
-        $fields          = json_decode( $form['fields'] ?? '[]', true ) ?: [];
-        $settings        = json_decode( $form['settings'] ?? '{}', true ) ?: [];
-        $form['fields']  = $fields;
-        $form['settings'] = $settings;
+        $form['fields']   = json_decode( $form['fields'] ?? '[]', true ) ?: [];
+        $form['settings'] = json_decode( $form['settings'] ?? '{}', true ) ?: [];
 
         $submission = [];
 
-        foreach ( $fields as $field ) {
+        foreach ( $form['fields'] as $field ) {
             $name = $field['name'] ?? '';
 
             if ( '' === $name ) {
@@ -83,20 +86,30 @@ class ShortcodeRenderer {
             }
         }
 
+        $submission = apply_filters( 'members_forge_submission_data', $submission, $form );
+
         do_action( 'members_forge_before_handle_submission', $form, $submission );
 
         $this->form_service->execute_actions( $form, $submission );
 
+        do_action( 'members_forge_after_handle_submission', $form, $submission );
+
         $redirect_url = wp_get_referer() ?: home_url();
         $redirect_url = add_query_arg( 'mf_success', $key, remove_query_arg( 'mf_success', $redirect_url ) );
+        $redirect_url = apply_filters( 'members_forge_redirect_url', $redirect_url, $form, $submission );
 
         wp_safe_redirect( $redirect_url );
         exit;
     }
 
     public function render( $atts ): string {
-        $atts = shortcode_atts( [ 'key' => '' ], $atts, 'mf_form' );
-        $key  = sanitize_title( $atts['key'] );
+        $atts = shortcode_atts(
+            apply_filters( 'members_forge_shortcode_defaults', [ 'key' => '', 'class' => '', 'title' => '' ] ),
+            $atts,
+            'mf_form'
+        );
+
+        $key = sanitize_title( $atts['key'] );
 
         if ( '' === $key ) {
             return '';
@@ -108,29 +121,38 @@ class ShortcodeRenderer {
             return '';
         }
 
-        $fields   = json_decode( $form['fields'] ?? '[]', true ) ?: [];
-        $settings = json_decode( $form['settings'] ?? '{}', true ) ?: [];
-
-        ob_start();
+        $form     = apply_filters( 'members_forge_form_data', $form, $key );
+        $fields   = apply_filters( 'members_forge_form_fields', json_decode( $form['fields'] ?? '[]', true ) ?: [], $form );
+        $settings = apply_filters( 'members_forge_form_settings', json_decode( $form['settings'] ?? '{}', true ) ?: [], $form );
 
         $submitted_key = sanitize_title( $_GET['mf_success'] ?? '' );
         $show_success  = '' !== $submitted_key && $submitted_key === $key;
+
+        ob_start();
+
+        do_action( 'members_forge_before_form_render', $form, $fields, $settings );
 
         if ( $show_success ) {
             $message = $settings['success_message'] ?? __( 'Form submitted successfully!', 'members-forge' );
             $this->render_success( $message );
 
             if ( ! empty( $settings['hide_after_submit'] ) ) {
+                do_action( 'members_forge_after_form_render', $form, $fields, $settings );
                 return ob_get_clean();
             }
         }
 
-        $this->render_form( $form, $fields, $settings, $key );
+        $this->render_form( $form, $fields, $settings, $key, $atts );
 
-        return ob_get_clean();
+        do_action( 'members_forge_after_form_render', $form, $fields, $settings );
+
+        $output = ob_get_clean();
+
+        return apply_filters( 'members_forge_form_html', $output, $form, $fields, $settings, $atts );
     }
 
     private function render_success( string $message ): void {
+        $message = apply_filters( 'members_forge_success_message', $message );
         ?>
         <div class="mf-form-success" role="alert">
             <?php echo wp_kses_post( wpautop( $message ) ); ?>
@@ -138,32 +160,55 @@ class ShortcodeRenderer {
         <?php
     }
 
-    private function render_form( array $form, array $fields, array $settings, string $key ): void {
+    private function render_form( array $form, array $fields, array $settings, string $key, array $atts ): void {
+        $form_classes = apply_filters( 'members_forge_form_classes', [ 'mf-form', 'mf-form-' . $key ], $form, $settings );
+
+        if ( ! empty( $atts['class'] ) ) {
+            $form_classes[] = esc_attr( $atts['class'] );
+        }
         ?>
-        <form method="post" class="mf-form mf-form-<?php echo esc_attr( $key ); ?>">
+        <form method="post" class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>">
+            <?php do_action( 'members_forge_form_top', $form, $settings ); ?>
+
             <?php wp_nonce_field( 'mf_submit_' . $key, 'mf_nonce' ); ?>
             <input type="hidden" name="mf_form_key" value="<?php echo esc_attr( $key ); ?>">
 
             <?php
             foreach ( $fields as $field ) {
-                $type = $field['type'] ?? 'text';
+                $field = apply_filters( 'members_forge_field_data', $field, $form );
+                $type  = $field['type'] ?? 'text';
+
+                $html = '';
 
                 if ( method_exists( $this, 'render_' . $type . '_field' ) ) {
+                    ob_start();
                     $this->{'render_' . $type . '_field'}( $field );
-                } else {
-                    $this->render_text_field( $field );
+                    $html = ob_get_clean();
+                }
+
+                $html = apply_filters( 'members_forge_field_html', $html, $field, $form );
+
+                if ( ! empty( $html ) ) {
+                    echo $html;
                 }
             }
             ?>
 
+            <?php do_action( 'members_forge_form_before_submit', $form, $settings ); ?>
+
             <div class="mf-form-actions">
                 <?php
                 $submit_label = $settings['submit_label'] ?? __( 'Submit', 'members-forge' );
+                $submit_html  = sprintf(
+                    '<button type="submit" name="mf_submit" class="%s">%s</button>',
+                    esc_attr( apply_filters( 'members_forge_submit_button_class', 'mf-submit-button', $form, $settings ) ),
+                    esc_html( $submit_label )
+                );
+                echo apply_filters( 'members_forge_submit_button_html', $submit_html, $form, $settings, $submit_label );
                 ?>
-                <button type="submit" name="mf_submit" class="mf-submit-button">
-                    <?php echo esc_html( $submit_label ); ?>
-                </button>
             </div>
+
+            <?php do_action( 'members_forge_form_bottom', $form, $settings ); ?>
         </form>
         <?php
     }
@@ -179,6 +224,7 @@ class ShortcodeRenderer {
                 value="<?php echo esc_attr( $this->submitted_value( $field ) ); ?>"
                 placeholder="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'text' ); ?>
             >
             <?php
         } );
@@ -195,6 +241,7 @@ class ShortcodeRenderer {
                 value="<?php echo esc_attr( $this->submitted_value( $field ) ); ?>"
                 placeholder="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'email' ); ?>
             >
             <?php
         } );
@@ -210,6 +257,7 @@ class ShortcodeRenderer {
                 class="mf-input mf-input-password"
                 placeholder="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'password' ); ?>
             >
             <?php
         } );
@@ -226,6 +274,7 @@ class ShortcodeRenderer {
                 value="<?php echo esc_attr( $this->submitted_value( $field ) ); ?>"
                 placeholder="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'number' ); ?>
             >
             <?php
         } );
@@ -240,6 +289,7 @@ class ShortcodeRenderer {
                 class="mf-input mf-input-textarea"
                 placeholder="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'textarea' ); ?>
             ><?php echo esc_textarea( $this->submitted_value( $field ) ); ?></textarea>
             <?php
         } );
@@ -255,6 +305,9 @@ class ShortcodeRenderer {
                 class="mf-input mf-input-date"
                 value="<?php echo esc_attr( $this->submitted_value( $field ) ); ?>"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php echo ! empty( $field['min_date'] ) ? 'min="' . esc_attr( $field['min_date'] ) . '"' : ''; ?>
+                <?php echo ! empty( $field['max_date'] ) ? 'max="' . esc_attr( $field['max_date'] ) . '"' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'date' ); ?>
             >
             <?php
         } );
@@ -270,6 +323,7 @@ class ShortcodeRenderer {
                 name="<?php echo esc_attr( $field['name'] ?? '' ); ?>"
                 class="mf-input mf-input-select"
                 <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                <?php do_action( 'members_forge_field_attributes', $field, 'select' ); ?>
             >
                 <option value=""><?php esc_html_e( 'Select...', 'members-forge' ); ?></option>
                 <?php foreach ( $options as $option ) : ?>
@@ -298,6 +352,7 @@ class ShortcodeRenderer {
                             class="mf-input mf-input-radio"
                             <?php checked( $selected, $option ); ?>
                             <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                            <?php do_action( 'members_forge_field_attributes', $field, 'radio', $option ); ?>
                         >
                         <span><?php echo esc_html( $option ); ?></span>
                     </label>
@@ -321,6 +376,7 @@ class ShortcodeRenderer {
                             value="<?php echo esc_attr( $option ); ?>"
                             class="mf-input mf-input-checkbox"
                             <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                            <?php do_action( 'members_forge_field_attributes', $field, 'checkbox', $option ); ?>
                         >
                         <span><?php echo esc_html( $option ); ?></span>
                     </label>
@@ -341,6 +397,7 @@ class ShortcodeRenderer {
                     value="1"
                     class="mf-input mf-input-checkbox"
                     <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                    <?php do_action( 'members_forge_field_attributes', $field, 'terms' ); ?>
                 >
                 <span><?php echo wp_kses_post( $label ); ?></span>
             </label>
@@ -363,6 +420,7 @@ class ShortcodeRenderer {
                             class="mf-input mf-input-radio"
                             <?php checked( $selected, (string) $level->id ); ?>
                             <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>
+                            <?php do_action( 'members_forge_field_attributes', $field, 'level_selector', $level ); ?>
                         >
                         <span class="mf-level-name"><?php echo esc_html( $level->name ); ?></span>
                         <?php if ( ! empty( $level->price ) ) : ?>
@@ -380,13 +438,13 @@ class ShortcodeRenderer {
     private function field_wrapper( array $field, callable $render ): void {
         $type     = $field['type'] ?? 'text';
         $required = ! empty( $field['required'] );
-        $classes  = 'mf-field mf-field-type-' . esc_attr( $type );
+        $classes  = apply_filters( 'members_forge_field_classes', [ 'mf-field', 'mf-field-type-' . $type ], $field );
 
         if ( $required ) {
-            $classes .= ' mf-field-required';
+            $classes[] = 'mf-field-required';
         }
         ?>
-        <div class="<?php echo $classes; ?>">
+        <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
             <?php if ( 'terms' !== $type ) : ?>
                 <label class="mf-label" for="mf-field-<?php echo esc_attr( $field['name'] ?? '' ); ?>">
                     <?php echo esc_html( $field['label'] ?? '' ); ?>
@@ -421,6 +479,6 @@ class ShortcodeRenderer {
             )
         );
 
-        return is_array( $results ) ? $results : [];
+        return apply_filters( 'members_forge_membership_levels', is_array( $results ) ? $results : [] );
     }
 }
