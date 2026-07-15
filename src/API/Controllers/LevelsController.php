@@ -146,8 +146,8 @@ class LevelsController extends AbstractController {
     }
 
     /**
-     * Request body থেকে sanitized level data তৈরি করা হচ্ছে
-     * create এবং update দুই জায়গায় reuse করা যাবে
+     * Build sanitized level data from request body
+     * Reusable between create and update
      */
     private function parse_level_data( array $raw ): array {
         return [
@@ -164,7 +164,7 @@ class LevelsController extends AbstractController {
     }
 
     /**
-     * JSON অথবা body params normalize করা হচ্ছে
+     * Normalize request params — JSON or form body
      */
     private function get_raw_params( WP_REST_Request $request ): array {
         $raw = $request->get_json_params();

@@ -62,7 +62,7 @@ class LevelRepository implements LevelRepositoryInterface {
         $sql = "SELECT * FROM {$this->table} ORDER BY priority DESC, id ASC";
         $levels = $wpdb->get_results($sql);
 
-        // 2. Filter: অন্য plugin levels array modify করতে পারবে
+        // 2. Filter: allow other plugins to modify levels array
         $levels = apply_filters('members_forge_levels', $levels);
 
         // Store cache for 1 hour
@@ -137,7 +137,7 @@ class LevelRepository implements LevelRepositoryInterface {
         do_action('members_forge_before_level_deleted', $id);
 
         global $wpdb;
-        // id ভিত্তিক delete, format %d মানে integer binding
+        // Delete by id — format %d ensures integer binding
         $resutl = $wpdb->delete(
             $this->table,
             ['id' => $id],
@@ -151,7 +151,7 @@ class LevelRepository implements LevelRepositoryInterface {
             do_action('members_forge_level_deleted', $id);
         }
 
-        // wpdb false দিলে query fail, অন্যথায় success হিসেবে true
+        // wpdb returns false on query failure, otherwise treat as success
         return $resutl !== false;
     }
 
@@ -174,7 +174,7 @@ class LevelRepository implements LevelRepositoryInterface {
 
     /**
      * Generate a unique slug from level name
-     * যদি একই slug আগে থেকে থাকে, তাহলে -2, -3 suffix যোগ করবে
+     * Appends -2, -3 suffix if slug already exists
      */
     private function generate_unique_slug( string $name ): string {
         global $wpdb;
@@ -190,7 +190,7 @@ class LevelRepository implements LevelRepositoryInterface {
         $slug = $base_slug;
         $counter = 2;
 
-        // যতক্ষণ current slug already exists, ততক্ষণ নতুন suffix দিয়ে retry
+        // Keep incrementing suffix while the slug already exists
         while ( $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM {$this->table} WHERE slug = %s LIMIT 1",

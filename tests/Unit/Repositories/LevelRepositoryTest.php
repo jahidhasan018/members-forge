@@ -285,7 +285,7 @@ class LevelRepositoryTest extends TestCase {
             ->with(
                 'wp_members_forge_levels',
                 Mockery::on(function($data) {
-                // Insert data তে slug থাকা উচিত এবং name থেকে generate হওয়া উচিত
+                // Insert data should contain slug generated from name
                     return isset($data['slug']) && $data['slug'] === 'gold-plan';
                 }),
                 Mockery::type('array')
@@ -332,7 +332,7 @@ class LevelRepositoryTest extends TestCase {
         ->with(
             'wp_members_forge_levels',
             Mockery::on(function($data) {
-                // Duplicate হলে -2 suffix আসা উচিত
+                // Duplicate slug should get -2 suffix
                 return isset($data['slug']) && $data['slug'] === 'gold-plan-2';
             }),
             Mockery::type('array')
@@ -387,7 +387,7 @@ class LevelRepositoryTest extends TestCase {
 
         $wpdb = Mockery::mock('wpdb');
         $wpdb->prefix = 'wp_';
-        // DB query হওয়া উচিত না
+        // No DB query should be made — served from cache
         $wpdb->shouldNotReceive('get_results');
         $GLOBALS['wpdb'] = $wpdb;
 
@@ -402,7 +402,7 @@ class LevelRepositoryTest extends TestCase {
     public function it_fires_deleted_action_with_id_on_delete() {
         Functions\when('wp_cache_delete')->justReturn(true);
 
-        // $id সহ action fire হওয়া উচিত
+        // Action should fire with the deleted $id
         \Brain\Monkey\Actions\expectDone('members_forge_level_deleted')
             ->once()
             ->with(7);

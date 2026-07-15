@@ -47,12 +47,12 @@ class LevelsControllerTest extends TestCase{
 
     /** @test */
     public function it_creates_a_level_and_returns_201(){
-        // WP helper mock করা হচ্ছে যাতে test environment এ dependency issue না হয়
+        // Mock WP helpers to avoid dependency issues in test environment
         Functions\when('rest_ensure_response')->returnArg();
         Functions\when('sanitize_text_field')->returnArg();
         Functions\when('current_user_can')->justReturn(true);
 
-        // Repository mock: create call এ নতুন id return করবে
+        // Repository mock: create returns new id
         $repoMock = Mockery::mock(LevelRepository::class);
         $repoMock->shouldReceive('create')
             ->once()
@@ -61,7 +61,7 @@ class LevelsControllerTest extends TestCase{
 
         $controller = new LevelsController($repoMock);
 
-        // Post request payload simulate করা হচ্ছে
+        // Simulate POST request payload
         $request = new \WP_REST_Request('POST', '/members-forge/v1/levels');
         $request->set_body_params([
             'name' => 'Pro Plan',
@@ -85,7 +85,7 @@ class LevelsControllerTest extends TestCase{
 
         $repoMock = Mockery::mock(LevelRepository::class);
 
-        // Update এর আগে existence check করা হচ্ছে
+        // Existence check performed before update
         $repoMock->shouldReceive('get_by_id')
             ->once()
             ->with(5)
@@ -120,13 +120,13 @@ class LevelsControllerTest extends TestCase{
 
         $repoMock = Mockery::mock(LevelRepository::class);
 
-        // id না থাকলে null return হবে
+        // Returns null when id does not exist
         $repoMock->shouldReceive('get_by_id')
             ->once()
             ->with(999)
             ->andReturn(null);
 
-        // not found case এ update call হওয়া উচিত না
+        // Should not call update when level is not found
         $repoMock->shouldNotReceive('update');
 
         $controller = new LevelsController($repoMock);

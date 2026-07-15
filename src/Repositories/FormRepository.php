@@ -50,7 +50,7 @@ class FormRepository implements FormRepositoryInterface {
     public function get_by_id( int $id ): ?array {
         $sql = "SELECT * FROM {$this->table} WHERE id = %d";
 
-        // Repository contract array return করে, তাই wpdb result array হিসেবে নাও।
+        // Repository contract returns array, so use ARRAY_A output
         $result = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $id ), self::ARRAY_OUTPUT );
 
         return $result;
@@ -64,7 +64,7 @@ class FormRepository implements FormRepositoryInterface {
     public function get_by_key( string $key ): ?array {
         $sql = "SELECT * FROM {$this->table} WHERE shortcode_key = %s";
 
-        // Shortcode lookup frontend render path এ যাবে, তাই stable array shape maintain করি।
+        // Shortcode lookup used for frontend rendering — maintain stable array shape
         $result = $this->wpdb->get_row( $this->wpdb->prepare( $sql, $key ), self::ARRAY_OUTPUT );
 
         return $result;
@@ -140,7 +140,7 @@ class FormRepository implements FormRepositoryInterface {
     }
 
     /**
-     * wpdb format inference insert/update call কে predictable রাখে।
+     * Infer wpdb format types for insert/update calls
      *
      * @param array $data
      * @return array

@@ -1,11 +1,11 @@
 import { __ } from '@wordpress/i18n';
 import Sidebar from './Sidebar';
-import Header from './Header'; // পথ ঠিক আছে কিনা চেক করে নিবেন
+import Header from './Header';
 
 const MainLayout = ({ children, title, subtitle, activePage, onNavigate }) => {
     return (
         <div className="mf-app-container flex min-h-screen bg-slate-100">
-            {/* Sidebar কে প্রপস পাঠানো হচ্ছে */}
+            {/* Pass props to Sidebar */}
             <Sidebar activePage={activePage} onNavigate={onNavigate} />
 
             {/* Main Content Area */}

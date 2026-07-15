@@ -3,7 +3,7 @@
  * PHPUnit Bootstrap File
  */
 
-// ১. কম্পোজার অটোলৌডার লোড করা
+// 1. Load Composer autoloader
 require_once dirname( __DIR__ ) . '/vendor/autoload.php';
 
 // WordPress Constants
@@ -11,14 +11,14 @@ if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
     define( 'HOUR_IN_SECONDS', 3600 );
 }
 
-// ২. Brain Monkey সেটআপ (WordPress ফাংশন মক করার জন্য)
+// 2. Set up Brain Monkey (mock WordPress functions)
 Brain\Monkey\setUp();
 
 /**
- * ৩. Mock WordPress Classes (যা unit test এ available না)
+ * 3. Mock WordPress Classes (not available in unit test environment)
  * 
- * WP_REST_Response class WordPress এ define করা আছে।
- * Unit test এ WordPress load হয় না, তাই mock বানাতে হয়।
+ * WP_REST_Response is defined in WordPress core.
+ * Since WordPress isn't loaded in unit tests, we provide mock implementations.
  */
 if ( ! class_exists( 'WP_REST_Response' ) ) {
     class WP_REST_Response {
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
             $this->params[ $key ] = $value;
         }
 
-        // WP-like helper: route params set করার জন্য
+        // WP-like helper: set route URL params
         public function set_url_params( array $params ) {
             foreach ( $params as $key => $value ) {
                 $this->params[ $key ] = $value;

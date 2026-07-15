@@ -3,7 +3,7 @@ import { Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-// Tab definition — label এবং key
+// Tab definition — label and key
 const TABS = [
     { key: 'general',    label: __('General',    'members-forge') },
     { key: 'membership', label: __('Membership', 'members-forge') },
@@ -19,7 +19,7 @@ const Settings = () => {
     const [activeTab, setActiveTab]   = useState('general');
     const [saved, setSaved]           = useState(false); // Save success notice
 
-    // Component mount হলে API থেকে settings আনো
+    // Fetch settings from API on component mount
     useEffect(() => {
         apiFetch({ path: '/members-forge/v1/settings' })
             .then((response) => {
@@ -34,7 +34,8 @@ const Settings = () => {
     }, []);
 
     /**
-     * Nested field update — settings.general.currency = 'EUR' এর মতো
+     * Update a nested settings field
+     * Example: settings.general.currency = 'EUR'
      * tab = 'general', field = 'currency', value = 'EUR'
      */
     const handleChange = (tab, field, value) => {
@@ -62,7 +63,7 @@ const Settings = () => {
         .then(() => {
             setSaving(false);
             setSaved(true);
-            // ৩ সেকেন্ড পর success notice লুকাও
+            // Hide success notice after 3 seconds
             setTimeout(() => setSaved(false), 3000);
         })
         .catch((err) => {
@@ -253,7 +254,7 @@ const MembershipTab = ({ settings, onChange }) => (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
             <label className="text-sm font-medium text-slate-700 pt-2">
                 {__('Grace Period (days)', 'members-forge')}
-                <span className="block text-xs text-slate-400 font-normal">Expire হওয়ার পরও কতদিন access থাকবে</span>
+                <span className="block text-xs text-slate-400 font-normal">Days of access after expiry</span>
             </label>
             <div className="sm:col-span-2">
                 <input

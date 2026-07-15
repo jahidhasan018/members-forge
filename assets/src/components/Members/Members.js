@@ -45,15 +45,14 @@ const Members = () => {
     }
     
     /**
-     * Status change করা হচ্ছে
+     * Handle membership status change
      * PUT /members-forge/v1/memberships/{id}/status
      */
     const handleStatusChange = (member, newStatus) => {
-        // Dropdown বন্ধ করো
+        // Close dropdown
         setOpenDropdown(null);
 
-        // Optimistic update — API call এর আগেই UI তে দেখাও
-        // এতে UI fast feel হয়
+        // Optimistic update — update UI before API responds
         setMembers((prev) =>
             prev.map((m) => m.id === member.id ? { ...m, status: newStatus } : m)
         );
@@ -64,7 +63,7 @@ const Members = () => {
             data: { status: newStatus },
         }).catch((error) => {
             console.error('Failed to update status:', error);
-            // API fail হলে পুরনো status ফিরিয়ে দাও
+            // Revert to old status on API failure
             setMembers((prev) =>
                 prev.map((m) => m.id === member.id ? { ...m, status: member.status } : m)
             );
@@ -72,7 +71,7 @@ const Members = () => {
     };
 
     /**
-     * Membership delete করা হচ্ছে
+     * Handle membership deletion
      * DELETE /members-forge/v1/memberships/{id}
      */
     const handleDelete = (member) => {
@@ -84,7 +83,7 @@ const Members = () => {
             path: `/members-forge/v1/memberships/${member.id}`,
             method: 'DELETE',
         }).then(() => {
-            // Delete হলে local state থেকে সরিয়ে দাও — refetch দরকার নেই
+            // Remove from local state on success
             setMembers((prev) => prev.filter((m) => m.id !== member.id));
         }).catch((error) => {
             console.error('Failed to delete membership:', error);
@@ -93,7 +92,7 @@ const Members = () => {
     };
 
     /**
-     * Status এর জন্য color class — Levels এর status badge এর মতোই pattern
+     * Get status badge color class — same pattern as Levels status badge
      */
     const getStatusClass = (status) => {
         const map = {
@@ -147,7 +146,7 @@ const Members = () => {
                         >
                             {/* Left: Avatar + Info */}
                             <div className="flex items-center gap-4 min-w-0">
-                                {/* Avatar — initials থেকে generate করা হচ্ছে */}
+                                {/* Avatar — generated from initials */}
                                 <div className="w-10 h-10 rounded-full bg-brand-600 text-brand-50 flex items-center justify-center text-sm font-bold shrink-0">
                                     {member.display_name?.charAt(0).toUpperCase() || '?'}
                                 </div>

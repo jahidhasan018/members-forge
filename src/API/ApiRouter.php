@@ -133,7 +133,7 @@ class ApiRouter implements ModuleInterface
             ]
         ]);
         
-        // --- Settings: GET সব settings, PUT settings save করো ---
+        // --- Settings: GET all settings, PUT to save ---
         register_rest_route( self::NAMESPACE, '/settings', [
             [
                 'methods'           => 'GET',

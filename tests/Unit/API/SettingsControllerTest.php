@@ -51,9 +51,9 @@ class SettingsControllerTest extends TestCase {
 
         $data = $response->data['data'];
 
-        // Saved value আসবে
+        // Saved value is returned
         $this->assertEquals('BDT', $data['general']['currency']);
-        // Default values এখনো আছে
+        // Default values are still present
         $this->assertEquals('Y-m-d', $data['general']['date_format']);
         $this->assertEquals('pending', $data['membership']['default_status']);
     }

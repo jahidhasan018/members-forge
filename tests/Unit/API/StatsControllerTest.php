@@ -13,13 +13,13 @@ if (!defined('HOUR_IN_SECONDS')) {
 
 class StatsControllerTest extends TestCase {
 
-    // ১. Brain Monkey সেটআপ করা
+    // 1. Set up Brain Monkey before each test
     protected function setUp(): void {
         parent::setUp();
         \Brain\Monkey\setUp();
     }
 
-    // ২. প্রতিটি টেস্টের পর ক্লিন করা
+    // 2. Clean up after each test
     protected function tearDown(): void {
         \Brain\Monkey\tearDown();
         parent::tearDown();
@@ -44,7 +44,7 @@ class StatsControllerTest extends TestCase {
         $response = $controller->get_stats();
 
         $this->assertTrue($response->data['success']);
-        // Cache থেকে এলে DB query হয়নি — তাই value same
+        // Value from cache — no DB query was made
         $this->assertEquals(100, $response->data['data']['total_members']);
         $this->assertEquals(80, $response->data['data']['active_members']);
     }

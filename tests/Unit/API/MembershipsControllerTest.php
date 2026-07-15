@@ -169,7 +169,7 @@ class MembershipsControllerTest extends TestCase {
         Functions\when('rest_ensure_response')->returnArg();
         Functions\when('current_user_can')->justReturn(true);
 
-        // JOIN query র মতো response — user ও level info সহ
+        // Response mimics JOIN query — includes user and level info
         $mock_data = [
             (object) [
                 'id'           => 1,

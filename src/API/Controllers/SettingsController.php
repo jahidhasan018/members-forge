@@ -18,7 +18,7 @@ class SettingsController extends AbstractController {
         return [
             'general' => [
                 'currency'          => 'USD',
-                'currency_position' => 'before', // $100 বা 100$
+                'currency_position' => 'before', // $100 or 100$
                 'date_format'       => 'Y-m-d',
                 'per_page'          => 20,
             ],

@@ -31,14 +31,14 @@ describe('Dashboard Component', () => {
         render(<Dashboard />);
 
         await waitFor(() => {
-            // StatCard label গুলো দেখা যাচ্ছে কিনা
+            // Verify StatCard labels are visible
             expect(screen.getByText(/total members/i)).toBeInTheDocument();
             expect(screen.getByText(/active members/i)).toBeInTheDocument();
         });
     });
 
     test('shows error state when API call fails', async () => {
-        // console.error কে mock করো — এটা expected তাই suppress করতে হবে
+        // Suppress expected console.error output during test
         jest.spyOn(console, 'error').mockImplementation(() => {});
 
         apiFetch.mockRejectedValue(new Error('Network error'));
@@ -49,7 +49,7 @@ describe('Dashboard Component', () => {
             expect(screen.getByText(/error loading data/i)).toBeInTheDocument();
         });
 
-        // Test শেষে restore করো
+        // Restore console.error after test
         console.error.mockRestore();
     });
 });
