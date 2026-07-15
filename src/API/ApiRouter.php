@@ -7,6 +7,7 @@ use MembersForge\API\Controllers\StatsController;
 use MembersForge\API\Controllers\LevelsController;
 use MembersForge\API\Controllers\MembershipsController;
 use MembersForge\API\Controllers\SettingsController;
+use MembersForge\API\Controllers\FormController;
 
 class ApiRouter implements ModuleInterface
 {
@@ -27,9 +28,14 @@ class ApiRouter implements ModuleInterface
     private $memberships_controller;
     
     /**
-     * $var SettingsController
+     * @var SettingsController
      */
     private $settings_controller;
+
+    /**
+     * @var FormController
+     */
+    private $form_controller;
 
     /**
      * API Namespace
@@ -44,12 +50,14 @@ class ApiRouter implements ModuleInterface
         StatsController $stats_controller, 
         LevelsController $levels_controller,
         MembershipsController $memberships_controller,
-        SettingsController $settings_controller
+        SettingsController $settings_controller,
+        FormController $form_controller
     ){
-        $this->stats_controller     = $stats_controller;
-        $this->levels_controller    = $levels_controller;
+        $this->stats_controller       = $stats_controller;
+        $this->levels_controller      = $levels_controller;
         $this->memberships_controller = $memberships_controller;
-        $this->settings_controller = $settings_controller;
+        $this->settings_controller    = $settings_controller;
+        $this->form_controller        = $form_controller;
     }
 
     public function init(): void
@@ -162,6 +170,61 @@ class ApiRouter implements ModuleInterface
                 'permission_callback' => [$this, 'check_admin_permission'],
             ]
         ]);
+
+        // ============================================================
+        // Form Builder Routes
+        // ============================================================
+
+        // --- Forms: GET list, POST create ---
+        register_rest_route( self::NAMESPACE, '/forms', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [ $this->form_controller, 'get_items' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+            [
+                'methods'             => 'POST',
+                'callback'            => [ $this->form_controller, 'create_item' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+        ] );
+
+        // --- Forms Single: GET, PUT, DELETE ---
+        register_rest_route( self::NAMESPACE, '/forms/(?P<id>\d+)', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [ $this->form_controller, 'get_item' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+            [
+                'methods'             => 'PUT',
+                'callback'            => [ $this->form_controller, 'update_item' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+            [
+                'methods'             => 'DELETE',
+                'callback'            => [ $this->form_controller, 'delete_item' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+        ] );
+
+        // --- Field Types: GET available field types ---
+        register_rest_route( self::NAMESPACE, '/field-types', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [ $this->form_controller, 'get_field_types' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+        ] );
+
+        // --- Forms Publish: POST draft → active ---
+        register_rest_route( self::NAMESPACE, '/forms/(?P<id>\d+)/publish', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [ $this->form_controller, 'publish_item' ],
+                'permission_callback' => [ $this, 'check_admin_permission' ],
+            ],
+        ] );
     }
 
     public function check_admin_permission()

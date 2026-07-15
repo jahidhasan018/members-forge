@@ -1,17 +1,38 @@
+import { useState } from '@wordpress/element';
 import { __ } from "@wordpress/i18n";
 
-/**
- * Sidebar Component - Custom navigation sidebar
- */
+const MenuItem = ({ item, activePage, onNavigate, collapsed, getIcon }) => (
+    <button
+        key={item.id}
+        onClick={() => onNavigate(item.id)}
+        title={collapsed ? item.name : undefined}
+        className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-brand-600 ${activePage === item.id
+            ? 'bg-brand-600 text-white shadow-lg'
+            : 'text-slate-400 hover:bg-brand-600 hover:text-white'
+        } ${collapsed ? 'justify-center' : ''}`}
+    >
+        <span className="shrink-0 text-current">
+            {getIcon(item.icon)}
+        </span>
+        {!collapsed && (
+            <span className="ml-3 font-medium text-sm text-current">
+                {__(item.name, 'members-forge')}
+            </span>
+        )}
+    </button>
+);
+
 const Sidebar = ({ activePage, onNavigate }) => {
+    const [collapsed, setCollapsed] = useState(false);
+
     const menuItems = [
-        { id: 'dashboard', name: 'Dashboard', icon: 'dashboard', active: true },
-        { id: 'levels', name: 'Levels', icon: 'layers', active: false },
-        { id: 'members', name: 'Members', icon: 'users', active: false },
-        { id: 'modules', name: 'Modules', icon: 'box', active: false },
-        { id: 'form-builder', name: 'Form Builder', icon: 'form', active: false },
-        { id: 'forge-ai', name: 'Forge AI', icon: 'ai', active: false },
-        { id: 'settings', name: 'Settings', icon: 'settings', active: false },
+        { id: 'dashboard', name: 'Dashboard', icon: 'dashboard' },
+        { id: 'levels', name: 'Levels', icon: 'layers' },
+        { id: 'members', name: 'Members', icon: 'users' },
+        { id: 'modules', name: 'Modules', icon: 'box' },
+        { id: 'forms', name: 'Form Builder', icon: 'form' },
+        { id: 'forge-ai', name: 'Forge AI', icon: 'ai' },
+        { id: 'settings', name: 'Settings', icon: 'settings' },
     ];
 
     const getIcon = (iconName) => {
@@ -66,50 +87,70 @@ const Sidebar = ({ activePage, onNavigate }) => {
         return icons[iconName] || <span className="w-5 h-5 flex items-center justify-center">•</span>;
     };
 
+    const toggleCollapsed = () => setCollapsed(prev => !prev);
+
     return (
-        <aside className="mf-sidebar w-56 bg-slate-900 flex flex-col shrink-0">
+        <aside className={`mf-sidebar bg-slate-900 flex flex-col shrink-0 transition-all duration-300 ${collapsed ? 'w-16' : 'w-56'}`}>
             {/* Logo Area */}
-            <div className="h-14 flex items-center px-4 border-b border-slate-800">
-                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center mr-3 shrink-0">
+            <div className={`h-14 flex items-center border-b border-slate-800 ${collapsed ? 'justify-center px-0' : 'px-4'}`}>
+                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                 </div>
-                <span className="text-lg font-bold text-white block">MembersForge</span>
-                <span className="text-sm block text-white grow-0"> v1.0</span>
+                {!collapsed && (
+                    <>
+                        <span className="ml-3 text-lg font-bold text-white block">MembersForge</span>
+                        <span className="ml-1 text-sm text-slate-400"> v1.0</span>
+                    </>
+                )}
             </div>
 
+            {/* Toggle Button */}
+            <button
+                onClick={toggleCollapsed}
+                title={collapsed ? __('Expand sidebar', 'members-forge') : __('Collapse sidebar', 'members-forge')}
+                className={`flex items-center py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ${collapsed ? 'justify-center' : 'px-4'}`}
+            >
+                <svg className={`w-4 h-4 transition-transform duration-300 ${collapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+                {!collapsed && (
+                    <span className="ml-3 text-xs">{__('Collapse', 'members-forge')}</span>
+                )}
+            </button>
+
             {/* Menu Items */}
-            <nav className="flex-1 py-4 px-3 overflow-y-auto">
-                <div className="space-y-1">
-                    {menuItems.map((item, index) => (
-                        <button
+            <nav className="flex-1 py-2 overflow-y-auto">
+                <div className={collapsed ? 'flex flex-col items-center gap-1' : 'px-3 space-y-1'}>
+                    {menuItems.map((item) => (
+                        <MenuItem
                             key={item.id}
-                            onClick={() => onNavigate(item.id)}
-                            className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-brand-600 ${activePage === item.id
-                                ? 'bg-brand-600 text-white shadow-lg'
-                                : 'text-slate-400 hover:bg-brand-600 hover:text-white'
-                                }`}
-                        >
-                            <span className="shrink-0 text-current">
-                                {getIcon(item.icon)}
-                            </span>
-                            <span className="ml-3 font-medium text-sm text-current">
-                                {__(item.name, 'members-forge')}
-                            </span>
-                        </button>
+                            item={item}
+                            activePage={activePage}
+                            onNavigate={onNavigate}
+                            collapsed={collapsed}
+                            getIcon={getIcon}
+                        />
                     ))}
                 </div>
             </nav>
 
             {/* Support Section */}
-            <div className="p-3 border-t border-slate-800">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 px-3">
-                    {__('Support', 'members-forge')}
-                </p>
-                <button className="w-full flex items-center px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <div className={`border-t border-slate-800 ${collapsed ? 'p-3' : 'p-3'}`}>
+                {!collapsed && (
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 px-3">
+                        {__('Support', 'members-forge')}
+                    </p>
+                )}
+                <button
+                    title={collapsed ? __('Documentation', 'members-forge') : undefined}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors ${collapsed ? 'justify-center' : ''}`}
+                >
                     <span className="shrink-0">{getIcon('docs')}</span>
-                    <span className="ml-3 text-sm">{__('Documentation', 'members-forge')}</span>
+                    {!collapsed && (
+                        <span className="ml-3 text-sm">{__('Documentation', 'members-forge')}</span>
+                    )}
                 </button>
             </div>
         </aside>
