@@ -9,6 +9,8 @@ import { useState, useCallback } from '@wordpress/element';
 
 let fieldCounter = 0;
 
+let typeCounters = {};
+
 /**
  * Generate a unique field ID.
  *
@@ -49,20 +51,56 @@ const useFormBuilderState = ( initialData = {} ) => {
      * @param {string} type Field type identifier.
      */
     const addField = useCallback( ( type ) => {
-        const newField = {
-            id: generateFieldId(),
-            type,
-            label: '',
-            name: '',
-            required: false,
-            order: fields.length,
-            placeholder: '',
-            options: [],
-        };
+        const id = generateFieldId();
+        typeCounters[ type ] = ( typeCounters[ type ] || 0 ) + 1;
 
-        setFields( ( prev ) => [ ...prev, newField ] );
-        setSelectedFieldId( newField.id );
-    }, [ fields.length ] );
+        setFields( ( prev ) => {
+            const newField = {
+                id,
+                type,
+                label: '',
+                name: `${type}_${typeCounters[ type ]}`,
+                required: false,
+                order: prev.length,
+                placeholder: '',
+                options: [],
+            };
+            return [ ...prev, newField ];
+        } );
+
+        setSelectedFieldId( id );
+    }, [] );
+
+    /**
+     * Load fields from server data (used when editing an existing form).
+     *
+     * @param {Array} fieldData Array of field objects from the REST API.
+     */
+    const loadFields = useCallback( ( fieldData ) => {
+        typeCounters = {};
+
+        const loaded = fieldData.map( ( f, index ) => {
+            const type = f.type || 'text';
+            typeCounters[ type ] = ( typeCounters[ type ] || 0 ) + 1;
+
+            return {
+                id: f.id || generateFieldId(),
+                type,
+                label: f.label || '',
+                name: f.name || `${type}_${typeCounters[ type ]}`,
+                required: !! f.required,
+                order: index,
+                placeholder: f.placeholder || '',
+                options: f.options || [],
+                min_date: f.min_date || '',
+                max_date: f.max_date || '',
+            };
+        } );
+
+        fieldCounter += loaded.length;
+        setFields( loaded );
+        setSelectedFieldId( null );
+    }, [] );
 
     /**
      * Remove a field from the form.
@@ -111,6 +149,7 @@ const useFormBuilderState = ( initialData = {} ) => {
         setFormMeta,
         setSelectedFieldId,
         addField,
+        loadFields,
         removeField,
         updateField,
         reorderFields,

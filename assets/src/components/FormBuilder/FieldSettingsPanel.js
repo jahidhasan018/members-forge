@@ -85,23 +85,17 @@ const FieldSettingsPanel = ( { field, onUpdateField } ) => {
             <Section title={ __( 'Basic', 'members-forge' ) } icon={
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             }>
-                {/* Field Type (Read-only) */}
-                <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">{ __( 'Type', 'members-forge' ) }</label>
-                    <div className="w-full px-3 py-2 bg-slate-50 rounded-lg text-sm text-slate-500 border border-slate-200 capitalize">{ field.type.replace( '_', ' ' ) }</div>
-                </div>
-
                 {/* Label */}
                 <div>
                     <label htmlFor={ `field-label-${ field.id }` } className="block text-[11px] font-medium text-slate-500 mb-1">{ __( 'Label', 'members-forge' ) }</label>
                     <input id={ `field-label-${ field.id }` } type="text" value={ field.label || '' } onChange={ ( e ) => handleChange( 'label', e.target.value ) } placeholder={ __( 'Enter field label', 'members-forge' ) } className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-400 transition-all placeholder-slate-300" />
                 </div>
 
-                {/* Name / Key */}
+                {/* Name / Key (auto-generated, read-only) */}
                 <div>
-                    <label htmlFor={ `field-name-${ field.id }` } className="block text-[11px] font-medium text-slate-500 mb-1">{ __( 'Name / Key', 'members-forge' ) }</label>
-                    <input id={ `field-name-${ field.id }` } type="text" value={ field.name || '' } onChange={ ( e ) => handleChange( 'name', e.target.value ) } placeholder={ __( 'e.g., first_name', 'members-forge' ) } className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-400 transition-all placeholder-slate-300 font-mono" />
-                    <p className="text-[10px] text-slate-400 mt-1">{ __( 'Used as the field name attribute in HTML.', 'members-forge' ) }</p>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1">{ __( 'Name / Key', 'members-forge' ) }</label>
+                    <div className="w-full px-3 py-2 bg-slate-50 rounded-lg text-sm text-slate-500 border border-slate-200 font-mono truncate">{ field.name || '' }</div>
+                    <p className="text-[10px] text-slate-400 mt-1">{ __( 'Auto-generated and unique. Used as the field name attribute in HTML.', 'members-forge' ) }</p>
                 </div>
             </Section>
 

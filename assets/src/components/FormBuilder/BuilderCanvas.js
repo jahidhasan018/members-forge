@@ -1,20 +1,6 @@
 import { useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-const TYPE_COLORS = {
-    text: 'bg-sky-100 text-sky-700',
-    email: 'bg-violet-100 text-violet-700',
-    password: 'bg-amber-100 text-amber-700',
-    number: 'bg-cyan-100 text-cyan-700',
-    textarea: 'bg-emerald-100 text-emerald-700',
-    select: 'bg-orange-100 text-orange-700',
-    radio: 'bg-pink-100 text-pink-700',
-    checkbox: 'bg-indigo-100 text-indigo-700',
-    date: 'bg-teal-100 text-teal-700',
-    level_selector: 'bg-blue-100 text-blue-700',
-    terms: 'bg-rose-100 text-rose-700',
-};
-
 const TYPE_ICONS = {
     text: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M3 8h12M3 12h6" /></svg>,
     email: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
@@ -29,108 +15,47 @@ const TYPE_ICONS = {
     terms: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
 };
 
-const getFieldPreview = ( field ) => {
-    const label = field.label || __( 'Untitled', 'members-forge' );
-
-    switch ( field.type ) {
-        case 'textarea':
-            return (
-                <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="h-14 bg-white rounded-lg border border-slate-200 px-3 py-2">
-                        <div className="w-1/2 h-2 bg-slate-200 rounded" />
-                        <div className="w-3/4 h-2 bg-slate-100 rounded mt-2" />
-                    </div>
-                </div>
-            );
-        case 'select':
-            return (
-                <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="h-8 bg-white rounded-lg border border-slate-200 flex items-center px-3 justify-between">
-                        <span className="text-xs text-slate-400">{ __( 'Select...', 'members-forge' ) }</span>
-                        <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                </div>
-            );
-        case 'checkbox':
-            return (
-                <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-600">{ label }</label>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-300 rounded-md" />
-                        <span className="text-xs text-slate-400">{ ( field.options && field.options[ 0 ] ) || __( 'Option', 'members-forge' ) }</span>
-                    </div>
-                    { field.options && field.options.length > 1 && (
-                        <span className="text-[10px] text-slate-400">+{ field.options.length - 1 } more</span>
-                    ) }
-                </div>
-            );
-        case 'terms':
-            return (
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-slate-300 rounded-md shrink-0" />
-                    <span className="text-xs text-slate-600">{ label }</span>
-                </div>
-            );
-        case 'radio':
-            return (
-                <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-300 rounded-full" />
-                        <span className="text-xs text-slate-400">{ ( field.options && field.options[ 0 ] ) || __( 'Option', 'members-forge' ) }</span>
-                    </div>
-                </div>
-            );
-        case 'level_selector':
-            return (
-                <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="h-8 bg-white rounded-lg border border-slate-200 flex items-center px-3 text-xs text-slate-400">
-                        { __( 'Select membership level...', 'members-forge' ) }
-                    </div>
-                </div>
-            );
-        case 'date':
-            return (
-                <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="h-8 bg-white rounded-lg border border-slate-200 flex items-center px-3 gap-2">
-                        <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        <span className="text-xs text-slate-400">{ __( 'Pick a date...', 'members-forge' ) }</span>
-                    </div>
-                </div>
-            );
-        default:
-            return (
-                <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-600">{ label }{ field.required && <span className="text-red-400 ml-0.5">*</span> }</label>
-                    <div className="h-8 bg-white rounded-lg border border-slate-200" />
-                </div>
-            );
-    }
-};
-
 const DragHandle = () => (
-    <svg className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
         <path d="M8 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM8 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM8 22a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
     </svg>
 );
 
-const DropIndicator = () => (
-    <div className="flex items-center gap-3 py-1.5">
-        <div className="flex-1 h-0.5 rounded-full bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
-        <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest shrink-0">
-            { __( 'Drop here', 'members-forge' ) }
-        </span>
-        <div className="flex-1 h-0.5 rounded-full bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
-    </div>
-);
+const InputPreview = ( { type } ) => {
+    switch ( type ) {
+        case 'textarea':
+            return <div className="h-6 bg-white rounded border border-slate-200 px-2 flex items-center"><span className="text-[10px] text-slate-300">---</span></div>;
+        case 'select':
+            return <div className="h-6 bg-white rounded border border-slate-200 px-2 flex items-center justify-between"><span className="text-[10px] text-slate-300">Select...</span><svg className="w-2.5 h-2.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></div>;
+        case 'checkbox':
+            return <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 border-2 border-slate-300 rounded" /><span className="text-[10px] text-slate-300">Option</span></div>;
+        case 'radio':
+            return <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 border-2 border-slate-300 rounded-full" /><span className="text-[10px] text-slate-300">Option</span></div>;
+        case 'terms':
+            return <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 border-2 border-slate-300 rounded" /><span className="text-[10px] text-slate-300">I agree...</span></div>;
+        case 'level_selector':
+            return <div className="h-6 bg-white rounded border border-slate-200 px-2 flex items-center"><span className="text-[10px] text-slate-300">Select level...</span></div>;
+        default:
+            return <div className="h-6 bg-white rounded border border-slate-200" />;
+    }
+};
 
 const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField, onReorderFields } ) => {
     const dragItem = useRef( null );
+    const dragOverIndexRef = useRef( null );
     const [ dragOverIndex, setDragOverIndex ] = useState( null );
+
+    const updateDragOver = ( index ) => {
+        if ( dragOverIndexRef.current !== index ) {
+            dragOverIndexRef.current = index;
+            setDragOverIndex( index );
+        }
+    };
+
+    const clearDragOver = () => {
+        dragOverIndexRef.current = null;
+        setDragOverIndex( null );
+    };
 
     const handleDragStart = ( index ) => {
         dragItem.current = index;
@@ -139,22 +64,22 @@ const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField,
     const handleDragOver = ( e, index ) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        setDragOverIndex( index );
+        updateDragOver( index );
     };
 
     const handleDragLeave = () => {
-        setDragOverIndex( null );
+        clearDragOver();
     };
 
-    const handleDrop = ( index ) => {
-        setDragOverIndex( null );
-        if ( dragItem.current === null || dragItem.current === index ) return;
-        onReorderFields( dragItem.current, index );
+    const handleDrop = ( targetIndex ) => {
+        clearDragOver();
+        if ( dragItem.current === null || dragItem.current === targetIndex ) return;
+        onReorderFields( dragItem.current, targetIndex );
         dragItem.current = null;
     };
 
     const handleDragEnd = () => {
-        setDragOverIndex( null );
+        clearDragOver();
         dragItem.current = null;
     };
 
@@ -170,7 +95,7 @@ const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField,
                     { __( 'No fields added yet', 'members-forge' ) }
                 </p>
                 <p className="text-sm text-slate-400 mb-6 max-w-xs">
-                    { __( 'Click a field type from the left panel or drag one here to start building your form.', 'members-forge' ) }
+                    { __( 'Click a field type from the right panel to start building your form.', 'members-forge' ) }
                 </p>
             </div>
         );
@@ -178,7 +103,6 @@ const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField,
 
     return (
         <div className="p-5">
-            {/* Header */}
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     { __( 'Form Fields', 'members-forge' ) }
@@ -188,16 +112,13 @@ const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField,
                 </h3>
             </div>
 
-            <div onDragLeave={ handleDragLeave }>
+            <div onDragLeave={ handleDragLeave } className="space-y-1">
                 { fields.map( ( field, index ) => {
                     const isDragTarget = dragOverIndex === index;
                     const isDragging = dragItem.current === index;
-                    const colorClass = TYPE_COLORS[ field.type ] || 'bg-slate-100 text-slate-700';
 
                     return (
                         <div key={ field.id }>
-                            { isDragTarget && <DropIndicator /> }
-
                             <div
                                 draggable
                                 onDragStart={ () => handleDragStart( index ) }
@@ -205,68 +126,66 @@ const BuilderCanvas = ( { fields, selectedFieldId, onSelectField, onRemoveField,
                                 onDrop={ () => handleDrop( index ) }
                                 onDragEnd={ handleDragEnd }
                                 onClick={ () => onSelectField( field.id ) }
-                                className={ `group relative flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                                className={ `group flex items-center gap-3 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-150 ${
                                     selectedFieldId === field.id
-                                        ? 'border-brand-400 bg-gradient-to-br from-brand-50 to-white shadow-md shadow-brand-500/10'
-                                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50'
-                                } ${ isDragging ? 'opacity-30 border-dashed border-slate-300 scale-[0.98]' : '' }` }
+                                        ? 'border-brand-400 bg-brand-50 shadow-sm shadow-brand-500/10'
+                                        : 'border-slate-200 bg-white hover:border-slate-300'
+                                } ${ isDragging ? 'opacity-30' : '' }` }
                             >
-                                {/* Drag Handle Area */}
-                                <div className="shrink-0 flex flex-col items-center gap-1 pt-0.5 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-60 transition-opacity">
+                                <span className="shrink-0 cursor-grab active:cursor-grabbing opacity-20 group-hover:opacity-60 transition-opacity">
                                     <DragHandle />
+                                </span>
+
+                                <span className="shrink-0 text-slate-400">
+                                    { TYPE_ICONS[ field.type ] }
+                                </span>
+
+                                <span className="text-sm font-medium text-slate-700 min-w-0 w-32 truncate">
+                                    { field.label || __( 'Untitled', 'members-forge' ) }
+                                </span>
+
+                                <div className="flex-1 max-w-xs">
+                                    <InputPreview type={ field.type } />
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2.5">
-                                        <span className={ `inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${ colorClass }` }>
-                                            { TYPE_ICONS[ field.type ] }
-                                            { field.type.replace( '_', ' ' ) }
-                                        </span>
-                                        { field.required && (
-                                            <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md">
-                                                { __( 'Required', 'members-forge' ) }
-                                            </span>
-                                        ) }
-                                        { field.name && (
-                                            <span className="text-[10px] text-slate-400 font-mono">
-                                                { field.name }
-                                            </span>
-                                        ) }
-                                    </div>
-                                    { getFieldPreview( field ) }
-                                </div>
+                                <button
+                                    onClick={ ( e ) => { e.stopPropagation(); onRemoveField( field.id ); } }
+                                    className="shrink-0 p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                    title={ __( 'Remove field', 'members-forge' ) }
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
 
-                                {/* Actions Column */}
-                                <div className="shrink-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={ ( e ) => { e.stopPropagation(); onRemoveField( field.id ); } }
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                        title={ __( 'Remove field', 'members-forge' ) }
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
+                            <div
+                                className={ `overflow-hidden transition-all duration-200 ${
+                                    isDragTarget ? 'max-h-8 opacity-100 py-1' : 'max-h-0 opacity-0'
+                                }` }
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="flex-1 h-px rounded-full bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
+                                    <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest shrink-0">
+                                        { __( 'Drop here', 'members-forge' ) }
+                                    </span>
+                                    <div className="flex-1 h-px rounded-full bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
                                 </div>
                             </div>
                         </div>
                     );
                 } ) }
 
-                {/* End drop zone */}
                 <div
-                    onDragOver={ ( e ) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverIndex( fields.length ); } }
+                    onDragOver={ ( e ) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; updateDragOver( fields.length ); } }
                     onDrop={ () => handleDrop( fields.length ) }
-                    onDragLeave={ ( e ) => { if ( e.currentTarget === e.target ) setDragOverIndex( null ); } }
-                    className={ `h-14 rounded-xl border-2 border-dashed transition-all duration-200 flex items-center justify-center mt-2 ${
+                    onDragLeave={ ( e ) => { if ( e.currentTarget === e.target ) clearDragOver(); } }
+                    className={ `h-10 rounded-lg border-2 border-dashed transition-all duration-200 flex items-center justify-center mt-1 ${
                         dragOverIndex === fields.length ? 'border-brand-400 bg-brand-50/50' : 'border-transparent'
                     }` }
                 >
                     { dragOverIndex === fields.length && (
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-brand-500">{ __( 'Drop here to add at the end', 'members-forge' ) }</span>
-                        </div>
+                        <span className="text-xs font-medium text-brand-500">{ __( 'Drop here to add at the end', 'members-forge' ) }</span>
                     ) }
                 </div>
             </div>

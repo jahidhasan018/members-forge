@@ -120,29 +120,34 @@ const Settings = () => {
                 </div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex gap-1 border-b border-slate-200 mb-6">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-                            activeTab === tab.key
-                                ? 'text-brand-600 border-b-2 border-brand-600 bg-brand-50'
-                                : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            {/* Settings Layout: Sidebar Tabs + Content */}
+            <div className="flex gap-6">
+                {/* Sidebar Tab Navigation */}
+                <div className="w-48 shrink-0">
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 ${
+                                    activeTab === tab.key
+                                        ? 'text-brand-600 border-l-brand-600 bg-brand-50'
+                                        : 'text-slate-500 border-l-transparent hover:text-slate-700 hover:bg-slate-50'
+                                } ${tab.key !== TABS[TABS.length - 1].key ? 'border-b border-slate-100' : ''}`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-            {/* Tab Content */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                {activeTab === 'general'    && <GeneralTab    settings={settings.general}    onChange={(f, v) => handleChange('general', f, v)} />}
-                {activeTab === 'membership' && <MembershipTab settings={settings.membership} onChange={(f, v) => handleChange('membership', f, v)} />}
-                {activeTab === 'email'      && <EmailTab      settings={settings.email}      onChange={(f, v) => handleChange('email', f, v)} />}
-                {activeTab === 'appearance' && <AppearanceTab settings={settings.appearance} onChange={(f, v) => handleChange('appearance', f, v)} />}
+                {/* Tab Content */}
+                <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-6">
+                    {activeTab === 'general'    && <GeneralTab    settings={settings.general}    onChange={(f, v) => handleChange('general', f, v)} />}
+                    {activeTab === 'membership' && <MembershipTab settings={settings.membership} onChange={(f, v) => handleChange('membership', f, v)} />}
+                    {activeTab === 'email'      && <EmailTab      settings={settings.email}      onChange={(f, v) => handleChange('email', f, v)} />}
+                    {activeTab === 'appearance' && <AppearanceTab settings={settings.appearance} onChange={(f, v) => handleChange('appearance', f, v)} />}
+                </div>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { __ } from "@wordpress/i18n";
 
 const MenuItem = ({ item, activePage, onNavigate, collapsed, getIcon }) => (
@@ -22,8 +22,14 @@ const MenuItem = ({ item, activePage, onNavigate, collapsed, getIcon }) => (
     </button>
 );
 
-const Sidebar = ({ activePage, onNavigate }) => {
-    const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ activePage, onNavigate, defaultCollapsed }) => {
+    const [collapsed, setCollapsed] = useState(defaultCollapsed);
+
+    useEffect( () => {
+        if ( defaultCollapsed ) {
+            setCollapsed( true );
+        }
+    }, [ defaultCollapsed ] );
 
     const menuItems = [
         { id: 'dashboard', name: 'Dashboard', icon: 'dashboard' },

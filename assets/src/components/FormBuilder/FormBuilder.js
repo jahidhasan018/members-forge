@@ -15,7 +15,8 @@ const FormBuilder = ( { formId, onBack } ) => {
     const [ typesLoading, setTypesLoading ] = useState( true );
     const [ error, setError ] = useState( null );
     const [ success, setSuccess ] = useState( false );
-    const [ settingsTab, setSettingsTab ] = useState( 'field' );
+    const [ rightTab, setRightTab ] = useState( 'fields' );
+    const [ showFormSettings, setShowFormSettings ] = useState( false );
 
     const state = useFormBuilderState( {} );
 
@@ -50,7 +51,7 @@ const FormBuilder = ( { formId, onBack } ) => {
                     },
                 } );
 
-                form.fields.forEach( ( field ) => state.addField( field.type ) );
+                state.loadFields( form.fields );
                 setLoading( false );
             } )
             .catch( ( err ) => {
@@ -59,6 +60,12 @@ const FormBuilder = ( { formId, onBack } ) => {
             } );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ formId ] );
+
+    useEffect( () => {
+        if ( state.selectedFieldId ) {
+            setRightTab( 'options' );
+        }
+    }, [ state.selectedFieldId ] );
 
     const handleSave = async () => {
         setSaving( true );
@@ -146,6 +153,22 @@ const FormBuilder = ( { formId, onBack } ) => {
                             </span>
                         ) }
 
+                        {/* Toggle Form Settings */}
+                        <button
+                            onClick={ () => setShowFormSettings( ! showFormSettings ) }
+                            className={ `p-2 rounded-xl transition-all ${
+                                showFormSettings
+                                    ? 'bg-brand-100 text-brand-600'
+                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                            }` }
+                            title={ __( 'Form Settings', 'members-forge' ) }
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+
                         {/* Form Name Input */}
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,19 +205,19 @@ const FormBuilder = ( { formId, onBack } ) => {
                         </button>
                     </div>
                 </div>
+
+                {/* Collapsible Form Settings */}
+                { showFormSettings && (
+                    <div className="border-t border-slate-100 mt-3 pt-3">
+                        <div className="max-w-3xl">
+                            <FormSettingsPanel formMeta={ state.formMeta } setFormMeta={ state.setFormMeta } />
+                        </div>
+                    </div>
+                ) }
             </div>
 
-            {/* 3-Panel Builder */}
+            {/* 2-Panel Builder */}
             <div className="flex-1 flex gap-4 min-h-0">
-                {/* Left: Field Palette */}
-                <div className="w-60 shrink-0 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                    <FieldPalette
-                        fieldTypes={ fieldTypes }
-                        loading={ typesLoading }
-                        onAddField={ state.addField }
-                    />
-                </div>
-
                 {/* Center: Builder Canvas */}
                 <div className="flex-1 bg-white rounded-2xl border border-slate-200 overflow-y-auto shadow-sm">
                     <BuilderCanvas
@@ -206,14 +229,29 @@ const FormBuilder = ( { formId, onBack } ) => {
                     />
                 </div>
 
-                {/* Right: Settings Panel with tabs */}
+                {/* Right: Fields / Options Tabs */}
                 <div className="w-80 shrink-0 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col">
                     {/* Tab Switcher */}
                     <div className="flex border-b border-slate-100 shrink-0">
                         <button
-                            onClick={ () => setSettingsTab( 'field' ) }
+                            onClick={ () => setRightTab( 'fields' ) }
                             className={ `flex-1 py-3 text-xs font-semibold text-center transition-all ${
-                                settingsTab === 'field'
+                                rightTab === 'fields'
+                                    ? 'text-brand-600 border-b-2 border-brand-600 bg-brand-50/30'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                            }` }
+                        >
+                            <span className="flex items-center justify-center gap-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                { __( 'Fields', 'members-forge' ) }
+                            </span>
+                        </button>
+                        <button
+                            onClick={ () => setRightTab( 'options' ) }
+                            className={ `flex-1 py-3 text-xs font-semibold text-center transition-all ${
+                                rightTab === 'options'
                                     ? 'text-brand-600 border-b-2 border-brand-600 bg-brand-50/30'
                                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                             }` }
@@ -222,33 +260,21 @@ const FormBuilder = ( { formId, onBack } ) => {
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                { __( 'Field', 'members-forge' ) }
-                            </span>
-                        </button>
-                        <button
-                            onClick={ () => setSettingsTab( 'form' ) }
-                            className={ `flex-1 py-3 text-xs font-semibold text-center transition-all ${
-                                settingsTab === 'form'
-                                    ? 'text-brand-600 border-b-2 border-brand-600 bg-brand-50/30'
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                            }` }
-                        >
-                            <span className="flex items-center justify-center gap-1.5">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                { __( 'Form', 'members-forge' ) }
+                                { __( 'Options', 'members-forge' ) }
                             </span>
                         </button>
                     </div>
 
-                    {/* Panel Content */}
+                    {/* Tab Content */}
                     <div className="flex-1 overflow-y-auto">
-                        { settingsTab === 'field' ? (
-                            <FieldSettingsPanel field={ state.selectedField } onUpdateField={ state.updateField } />
+                        { rightTab === 'fields' ? (
+                            <FieldPalette
+                                fieldTypes={ fieldTypes }
+                                loading={ typesLoading }
+                                onAddField={ state.addField }
+                            />
                         ) : (
-                            <FormSettingsPanel formMeta={ state.formMeta } setFormMeta={ state.setFormMeta } />
+                            <FieldSettingsPanel field={ state.selectedField } onUpdateField={ state.updateField } />
                         ) }
                     </div>
                 </div>

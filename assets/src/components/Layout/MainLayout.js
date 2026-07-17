@@ -6,7 +6,7 @@ const MainLayout = ({ children, title, subtitle, activePage, onNavigate }) => {
     return (
         <div className="mf-app-container flex min-h-screen bg-slate-100">
             {/* Pass props to Sidebar */}
-            <Sidebar activePage={activePage} onNavigate={onNavigate} />
+            <Sidebar activePage={activePage} onNavigate={onNavigate} defaultCollapsed={activePage === 'form-builder'} />
 
             {/* Main Content Area */}
             <div className="mf-main-content flex flex-col flex-1 min-w-0">
