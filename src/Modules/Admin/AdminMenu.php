@@ -23,15 +23,15 @@ class AdminMenu implements ModuleInterface{
     }
 
     public function enqueue_assets( $hook ) {
-        // শুধু আমাদের প্লাগিন পেজেই স্ক্রিপ্ট লোড হবে, অন্য কোথাও না (পারফরম্যান্স অপ্টিমাইজেশন)
+        // Only load on our plugin page — performance optimization
         if ( 'toplevel_page_members-forge' !== $hook ) {
             return;
         }
 
-        // Plugin root directory খুঁজে বের করা (src/Modules/Admin -> plugin root)
-        $plugin_root = dirname( __DIR__, 3 ); // 3 লেভেল উপরে যাওয়া
+        // Resolve plugin root from (src/Modules/Admin -> plugin root)
+        $plugin_root = dirname( __DIR__, 3 ); // 3 levels up from src/Modules/Admin
         
-        // অটো-জেনারেটেড অ্যাসেট ফাইল লোড করা
+        // Load auto-generated asset dependencies file
         $asset_file = require $plugin_root . '/assets/build/index.asset.php';
 
         wp_enqueue_script(
@@ -42,7 +42,7 @@ class AdminMenu implements ModuleInterface{
             true
         );
         
-        // Tailwind CSS লোড করা
+        // Load Tailwind CSS
         wp_enqueue_style(
             'members-forge-styles',
             plugins_url( 'assets/build/style-index.css', $plugin_root . '/members-forge.php' ),
@@ -50,7 +50,7 @@ class AdminMenu implements ModuleInterface{
             $asset_file['version']
         );
         
-        // WordPress Components এর স্টাইল পাওয়ার জন্য
+        // Enqueue WordPress Components styles
         wp_enqueue_style( 'wp-components' );
     }
 

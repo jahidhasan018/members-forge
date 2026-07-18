@@ -22,3 +22,6 @@ npm-debug.log
 /wp-content/uploads
 
 /assets/build/
+
+# AI Agent Documentation
+/doc/

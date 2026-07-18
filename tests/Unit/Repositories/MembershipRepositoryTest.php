@@ -193,7 +193,7 @@ class MembershipRepositoryTest extends TestCase{
         Functions\when('wp_cache_get')->justReturn(false);
         Functions\when('wp_cache_set')->justReturn(true);
 
-        // JOIN query র result — user এবং level info সহ
+        // JOIN query result — includes user and level info
         $mock_data = [
             (object) [
                 'id'           => 1,

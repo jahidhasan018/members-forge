@@ -117,8 +117,8 @@ class MembershipsController extends AbstractController {
     }
 
     /**
-     * GET /memberships — Admin: সব members list
-     * JOIN query র মাধ্যমে user ও level info সহ
+     * GET /memberships — Admin: list all memberships
+     * Includes user and level info via JOIN query
      */
     public function get_all_memberships( WP_REST_Request $request ) {
         $memberships = $this->repository->get_all();

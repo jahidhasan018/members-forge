@@ -1,23 +1,19 @@
 /**
  * Members Component Test Suite
  * 
- * আমরা test করবো:
- * 1. Loading state ঠিকমতো দেখায় কিনা
- * 2. API call সফল হলে member list render হয় কিনা  
- * 3. Empty state দেখায় কিনা যখন কোনো member নেই
- * 4. Status change button কাজ করে কিনা
+ * Tests covered:
+ * 1. Loading state displays correctly
+ * 2. Member list renders after successful API call
+ * 3. Empty state shows when no members exist
+ * 4. Status badges render for each member
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
 
-// apiFetch mock করবো কারণ actual API call করা যাবে না test এ
+// Mock apiFetch to avoid actual HTTP requests in test environment
 import apiFetch from '@wordpress/api-fetch';
-
-// Members component import করবো
 import Members from './Members';
 
-// @wordpress/api-fetch কে mock করা হচ্ছে
-// এটা না করলে test environment এ actual HTTP request যাবে
 jest.mock('@wordpress/api-fetch');
 
 // Reset mocks before each test

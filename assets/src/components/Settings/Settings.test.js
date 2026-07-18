@@ -8,7 +8,7 @@ beforeEach(() => {
     jest.clearAllMocks();
 });
 
-// Mock settings data যা API থেকে আসবে
+// Mock settings data returned by API
 const mockSettings = {
     success: true,
     data: {
@@ -22,7 +22,7 @@ const mockSettings = {
 describe('Settings Component', () => {
 
     test('shows loading spinner while fetching settings', () => {
-        // API pending রাখো — loading দেখাবে
+        // Keep API pending to show loading state
         apiFetch.mockReturnValue(new Promise(() => {}));
         render(<Settings />);
         expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe('Settings Component', () => {
         render(<Settings />);
 
         await waitFor(() => {
-            // Tab button গুলো role="button" দিয়ে খুঁজবো — exact match
+            // Find tab buttons by role — exact match
             expect(screen.getByRole('button', { name: 'General' })).toBeInTheDocument();
             expect(screen.getByRole('button', { name: 'Membership' })).toBeInTheDocument();
             expect(screen.getByRole('button', { name: 'Email' })).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('Settings Component', () => {
         render(<Settings />);
 
         await waitFor(() => {
-            // "Currency" label exact match — "Currency Position" নয়
+            // "Currency" label exact match — not "Currency Position"
             expect(screen.getByText('Currency')).toBeInTheDocument();
         });
     });
@@ -59,7 +59,7 @@ describe('Settings Component', () => {
             expect(screen.getByRole('button', { name: 'Membership' })).toBeInTheDocument();
         });
 
-        // Tab button এ click করো — role দিয়ে specific
+        // Click on tab button using role for specificity
         fireEvent.click(screen.getByRole('button', { name: 'Membership' }));
 
         await waitFor(() => {

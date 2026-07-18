@@ -51,7 +51,7 @@ jest.mock('@wordpress/components', () => ({
 
 describe('LevelForm Component', () => {
 
-    // টেস্ট ১: ফর্ম ফিল্ডগুলো ঠিকমতো দেখাচ্ছে কিনা
+    // Test 1: Verify all form fields render correctly
     test('renders all necessary fields', () => {
         render(<LevelForm onSave={() => { }} />);
 
@@ -60,22 +60,21 @@ describe('LevelForm Component', () => {
         expect(screen.getByText(/Create Level/i)).toBeInTheDocument();
     });
 
-    // টেস্ট ২: ফর্ম সাবমিট করলে onSave কল হয় কিনা
+    // Test 2: Verify onSave is called on form submission
     test('calls onSave with data when submitted', () => {
         const handleSave = jest.fn();
         render(<LevelForm onSave={handleSave} />);
 
-        // নাম টাইপ করা
+        // Type name into input
         const nameInput = screen.getByLabelText(/Level Name/i);
         fireEvent.change(nameInput, { target: { value: 'Gold Plan' } });
 
-        // সেভ বাটনে ক্লিক
+        // Click save button
         const saveButton = screen.getByText(/Create Level/i);
         fireEvent.click(saveButton);
 
-        // ভেরিফিকেশন
+        // Verify onSave was called with correct data
         expect(handleSave).toHaveBeenCalledTimes(1);
-        // আমরা চেক করছি যে সেভ ফাংশনটি 'Gold Plan' ডাটা পেয়েছে কিনা
         expect(handleSave).toHaveBeenCalledWith(expect.objectContaining({
             name: 'Gold Plan'
         }));

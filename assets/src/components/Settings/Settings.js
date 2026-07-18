@@ -3,7 +3,7 @@ import { Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-// Tab definition — label এবং key
+// Tab definition — label and key
 const TABS = [
     { key: 'general',    label: __('General',    'members-forge') },
     { key: 'membership', label: __('Membership', 'members-forge') },
@@ -19,7 +19,7 @@ const Settings = () => {
     const [activeTab, setActiveTab]   = useState('general');
     const [saved, setSaved]           = useState(false); // Save success notice
 
-    // Component mount হলে API থেকে settings আনো
+    // Fetch settings from API on component mount
     useEffect(() => {
         apiFetch({ path: '/members-forge/v1/settings' })
             .then((response) => {
@@ -34,7 +34,8 @@ const Settings = () => {
     }, []);
 
     /**
-     * Nested field update — settings.general.currency = 'EUR' এর মতো
+     * Update a nested settings field
+     * Example: settings.general.currency = 'EUR'
      * tab = 'general', field = 'currency', value = 'EUR'
      */
     const handleChange = (tab, field, value) => {
@@ -62,7 +63,7 @@ const Settings = () => {
         .then(() => {
             setSaving(false);
             setSaved(true);
-            // ৩ সেকেন্ড পর success notice লুকাও
+            // Hide success notice after 3 seconds
             setTimeout(() => setSaved(false), 3000);
         })
         .catch((err) => {
@@ -119,29 +120,34 @@ const Settings = () => {
                 </div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex gap-1 border-b border-slate-200 mb-6">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-                            activeTab === tab.key
-                                ? 'text-brand-600 border-b-2 border-brand-600 bg-brand-50'
-                                : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            {/* Settings Layout: Sidebar Tabs + Content */}
+            <div className="flex gap-6">
+                {/* Sidebar Tab Navigation */}
+                <div className="w-48 shrink-0">
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 ${
+                                    activeTab === tab.key
+                                        ? 'text-brand-600 border-l-brand-600 bg-brand-50'
+                                        : 'text-slate-500 border-l-transparent hover:text-slate-700 hover:bg-slate-50'
+                                } ${tab.key !== TABS[TABS.length - 1].key ? 'border-b border-slate-100' : ''}`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-            {/* Tab Content */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                {activeTab === 'general'    && <GeneralTab    settings={settings.general}    onChange={(f, v) => handleChange('general', f, v)} />}
-                {activeTab === 'membership' && <MembershipTab settings={settings.membership} onChange={(f, v) => handleChange('membership', f, v)} />}
-                {activeTab === 'email'      && <EmailTab      settings={settings.email}      onChange={(f, v) => handleChange('email', f, v)} />}
-                {activeTab === 'appearance' && <AppearanceTab settings={settings.appearance} onChange={(f, v) => handleChange('appearance', f, v)} />}
+                {/* Tab Content */}
+                <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-6">
+                    {activeTab === 'general'    && <GeneralTab    settings={settings.general}    onChange={(f, v) => handleChange('general', f, v)} />}
+                    {activeTab === 'membership' && <MembershipTab settings={settings.membership} onChange={(f, v) => handleChange('membership', f, v)} />}
+                    {activeTab === 'email'      && <EmailTab      settings={settings.email}      onChange={(f, v) => handleChange('email', f, v)} />}
+                    {activeTab === 'appearance' && <AppearanceTab settings={settings.appearance} onChange={(f, v) => handleChange('appearance', f, v)} />}
+                </div>
             </div>
         </div>
     );
@@ -253,7 +259,7 @@ const MembershipTab = ({ settings, onChange }) => (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
             <label className="text-sm font-medium text-slate-700 pt-2">
                 {__('Grace Period (days)', 'members-forge')}
-                <span className="block text-xs text-slate-400 font-normal">Expire হওয়ার পরও কতদিন access থাকবে</span>
+                <span className="block text-xs text-slate-400 font-normal">Days of access after expiry</span>
             </label>
             <div className="sm:col-span-2">
                 <input

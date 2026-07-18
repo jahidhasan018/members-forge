@@ -2,8 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Modal from './Modal';
 import '@testing-library/jest-dom';
 
-// ১. @wordpress/components কে মক (Mock) করা
-// এতে আমরা নিশ্চিত করছি যে আমাদের টেস্ট environment বা পোর্টাল নিয়ে ঝামেলা করবে না
+// Mock @wordpress/components to avoid test environment conflicts
 jest.mock('@wordpress/components', () => ({
     Modal: ({ title, children, onRequestClose }) => (
         <div role="dialog">
@@ -22,7 +21,7 @@ describe('Modal Component', () => {
                 <p>Modal Content</p>
             </Modal>
         );
-        // কিছুই রেন্ডার হওয়া উচিত না
+        // Expect nothing to render when closed
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -33,7 +32,7 @@ describe('Modal Component', () => {
             </Modal>
         );
 
-        // মক করা টাইটেল এবং কন্টেন্ট চেক করা
+        // Verify mocked title and content render
         expect(screen.getByText('Test Modal')).toBeInTheDocument();
         expect(screen.getByText('Modal Content')).toBeInTheDocument();
     });
@@ -46,10 +45,10 @@ describe('Modal Component', () => {
             </Modal>
         );
 
-        // ক্লোজ বাটনে ক্লিক (মক করা বাটনে)
+        // Click close button (mocked component)
         fireEvent.click(screen.getByRole('button', { name: /Close/i }));
 
-        // চেক করা যে ফাংশনটি কল হয়েছে কিনা
+        // Verify onClose was called
         expect(handleClose).toHaveBeenCalledTimes(1);
     });
 });
